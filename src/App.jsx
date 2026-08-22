@@ -28,10 +28,8 @@ export default function App() {
   // application history
   const [applications, setApplications] = useState(initialApplications);
 
-  // page change hole scroll up kora
-  useEffect(() => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }, [currentPage]);
+ 
+  
 
   // pet details e jawar handler
   const handleSelectPet = (pet) => {
@@ -46,16 +44,9 @@ export default function App() {
   };
 
   // favorite toggle korar handler
-  const handleToggleFavorite = (petId) => {
-    setPets((prevPets) =>
-      prevPets.map((pet) =>
-        pet.id === petId ? { ...pet, isFavorite: !pet.isFavorite } : pet
-      )
-    );
-    if (selectedPet && selectedPet.id === petId) {
-      setSelectedPet((prev) => (prev ? { ...prev, isFavorite: !prev.isFavorite } : null));
-    }
-  };
+  function handleToggleFavorite(petId) {
+  setPets(pets => pets.map(pet => pet.id === petId ? { ...pet, isFavorite: !pet.isFavorite } : pet));
+}
 
   // new application submit korar handler
   const handleSubmitApplication = (newApp) => {
