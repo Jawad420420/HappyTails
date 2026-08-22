@@ -159,6 +159,7 @@ export default function App() {
         {renderCurrentPage()}
       </main>
 
+      {/* mobile bottom navigation bar */}
       
     </div>
   );
