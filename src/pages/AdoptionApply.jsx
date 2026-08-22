@@ -9,8 +9,7 @@ export default function AdoptionApply({ selectedPet, onBack, onSubmitApplication
     location: '',
     housingType: 'House',
     ownOrRent: 'Own',
-    hasFencedYard: 'Yes, fully fenced',
-    hasOtherPets: 'No',
+  
     termsAccepted: false,
   });
 
