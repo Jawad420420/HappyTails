@@ -4,7 +4,7 @@ import { initialPetsData, initialApplications } from './data/petsData';
 
 // components import
 import Header from './components/Header';
-import BottomNav from './components/BottomNav';
+
 
 // pages import
 import Home from './pages/Home';
@@ -168,11 +168,7 @@ export default function App() {
         {renderCurrentPage()}
       </main>
 
-      {/* mobile bottom navigation bar */}
-      <BottomNav
-        currentPage={currentPage}
-        onNavigate={setCurrentPage}
-      />
+      
     </div>
   );
 }
