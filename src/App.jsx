@@ -12,6 +12,10 @@ import FindPet from './pages/FindPet';
 import PetDetails from './pages/PetDetails';
 import AdoptionApply from './pages/AdoptionApply';
 import MyApplications from './pages/MyApplications';
+import AddPet from './pages/AddPet';
+import Volunteer from './pages/Volunteer';
+import Vaccination from './pages/Vaccination';
+import AdminDashboard from './pages/AdminDashboard';
 
 // placeholder pages removed
 export default function App() {
@@ -124,6 +128,19 @@ export default function App() {
             onNavigate={setCurrentPage}
           />
         );
+
+      case 'add-pet':
+           console.log("ADD PET CLICKED");
+           return <AddPet />;
+
+      case 'volunteer':
+            return <Volunteer />;
+
+      case 'vaccination':
+          return <Vaccination />;
+
+      case 'admin':
+          return <AdminDashboard />;
 
       // missing placeholder pages handled by default
       default:

@@ -1,5 +1,5 @@
 // top app bar and desktop nav component
-import { PawPrint, Bell, Search } from 'lucide-react';
+import { PawPrint, Search, User } from 'lucide-react';
 
 export default function Header({ currentPage, onNavigate }) {
   // desktop nav items list
@@ -7,6 +7,7 @@ export default function Header({ currentPage, onNavigate }) {
     { label: 'Home', page: 'home' },
     { label: 'Find a Pet', page: 'search' },
     { label: 'Apply', page: 'apply' },
+    { label: 'Add Pet', page: 'add-pet' },
     { label: 'My Applications', page: 'applications' },
   ];
 
@@ -46,24 +47,61 @@ export default function Header({ currentPage, onNavigate }) {
         </nav>
 
         {/* right actions */}
+        
         <div className="flex items-center gap-4">
-          <button
-            onClick={() => onNavigate('search')}
-            className="p-2.5 rounded-full hover:bg-gray-100 text-gray-600 hover:text-[#426306] transition-all duration-300 hover:rotate-12"
-            title="Search pets"
-          >
-            <Search className="w-5 h-5" />
-          </button>
 
-          <button
-            onClick={() => onNavigate('applications')}
-            className="p-2.5 rounded-full hover:bg-gray-100 text-gray-600 hover:text-[#426306] transition-all duration-300 relative group"
-            title="My Applications"
-          >
-            <Bell className="w-5 h-5 group-hover:animate-swing" />
-            <span className="absolute top-2 right-2 w-2.5 h-2.5 rounded-full bg-red-500 ring-2 ring-white" />
-          </button>
-        </div>
+  <button
+    onClick={() => onNavigate('search')}
+    className="
+    p-2.5
+    rounded-full
+    hover:bg-gray-100
+    text-gray-600
+    hover:text-[#426306]
+    transition
+    "
+    title="Search pets"
+  >
+    <Search className="w-5 h-5" />
+  </button>
+
+
+  <button
+  onClick={() => onNavigate('admin')}
+  className="
+    flex
+    items-center
+    gap-2
+    px-5
+    py-2.5
+    rounded-2xl
+    bg-[#e8f2d8]
+    text-[#426306]
+    font-bold
+    border
+    border-[#d5e8b8]
+    hover:bg-[#dcecc5]
+    hover:shadow-md
+    hover:scale-105
+    transition-all
+    duration-300
+    active:scale-95
+  "
+>
+
+  <User 
+    className="
+      w-5
+      h-5
+    "
+  />
+
+  Admin
+
+</button>
+
+
+</div>
       </header>
 
       {/* mobile top app bar */}
@@ -82,13 +120,7 @@ export default function Header({ currentPage, onNavigate }) {
           Happy Tails
         </h1>
 
-        <button
-          onClick={() => onNavigate('applications')}
-          className="w-10 h-10 flex items-center justify-center rounded-full text-gray-600 hover:bg-gray-100 transition-colors active:scale-95 relative"
-        >
-          <Bell className="w-6 h-6" />
-          <span className="absolute top-2 right-2.5 w-2 h-2 rounded-full bg-red-500 ring-2 ring-white" />
-        </button>
+        
       </header>
     </>
   );
