@@ -10,13 +10,13 @@ export default function ApplicationForm({ formData, setFormData, handleSubmit })
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-        <div className="space-y-1.5">
+        <div className="space-y-1.5"> // container
           <label className="text-sm font-semibold text-gray-700 ml-1">Full Name</label>
           <div className="relative">
             <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
               <User className="w-5 h-5 text-gray-400" />
             </div>
-            <input
+            <input  
               type="text"
               placeholder="John Doe"
               value={formData.fullName}
