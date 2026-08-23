@@ -4,6 +4,7 @@ import { initialPetsData, initialApplications } from './data/petsData';
 // Components import
 import Header from './components/Header';
 
+
 // Pages import
 import Home from './pages/Home';
 import FindPet from './pages/FindPet';
@@ -26,9 +27,8 @@ export default function App() {
   const [selectedPet, setSelectedPet] = useState(initialPetsData[0]);
   const [applications, setApplications] = useState(initialApplications);
 
-  useEffect(() => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }, [currentPage]);
+ 
+  
 
   const handleSelectPet = (pet) => {
     setSelectedPet(pet);
@@ -40,16 +40,10 @@ export default function App() {
     setCurrentPage('apply');
   };
 
-  const handleToggleFavorite = (petId) => {
-    setPets((prevPets) =>
-      prevPets.map((pet) =>
-        pet.id === petId ? { ...pet, isFavorite: !pet.isFavorite } : pet
-      )
-    );
-    if (selectedPet && selectedPet.id === petId) {
-      setSelectedPet((prev) => (prev ? { ...prev, isFavorite: !prev.isFavorite } : null));
-    }
-  };
+  // favorite toggle korar handler
+  function handleToggleFavorite(petId) {
+  setPets(pets => pets.map(pet => pet.id === petId ? { ...pet, isFavorite: !pet.isFavorite } : pet));
+}
 
   const handleSubmitApplication = (newApp) => {
     setApplications((prev) => [newApp, ...prev]);
