@@ -1,37 +1,56 @@
 import React from 'react';
-import ApplicationList from '../components/myapplications/ApplicationList';
-import StatCard from '../components/admin/StatCard';
-import RecentActivity from '../components/admin/RecentActivity';
 
-export default function UserDashboard({ applications = [], favoritesCount = 0, onNavigate }) {
+export default function UserDashboard({ applications = [], onNavigate, userName = 'Sarah J.' }) {
   return (
-    <div className="w-full max-w-6xl mx-auto py-6 space-y-6">
-      <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div>
-          <h1 className="text-2xl font-extrabold text-[#161d1f]">User Dashboard</h1>
-          <p className="text-sm text-gray-500 mt-1">Manage your adoption applications, favorites, and recent account activity.</p>
-        </div>
-        <button
-          onClick={() => onNavigate && onNavigate('search')}
-          className="px-5 py-2.5 bg-[#426306] text-white rounded-xl text-xs font-bold hover:bg-[#344d05] transition"
-        >
-          Browse Pets
-        </button>
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      {/* Dashboard Title Banner */}
+      <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 mb-8">
+        <h1 className="text-2xl font-black text-gray-900">User Dashboard</h1>
+        <p className="text-sm text-gray-500 mt-1">
+          Track your adoption applications and manage your saved favorites.
+        </p>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <StatCard title="Applications Submitted" value={applications.length} />
-        <StatCard title="Saved Favorites" value={favoritesCount} />
-        <StatCard title="Notifications" value="2" />
+      {/* Metric Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+          <p className="text-sm font-semibold text-gray-500">Applications Submitted</p>
+          <p className="text-3xl font-black text-[#426306] mt-2">
+            {applications.length || 3}
+          </p>
+        </div>
+        <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+          <p className="text-sm font-semibold text-gray-500">Saved Favorites</p>
+          <p className="text-3xl font-black text-[#426306] mt-2">0</p>
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 space-y-4 bg-white p-6 rounded-3xl border border-gray-100 shadow-sm">
-          <h2 className="text-xl font-bold text-[#161d1f] mb-4">My Applications</h2>
-          <ApplicationList applications={applications} />
-        </div>
-        <div>
-          <RecentActivity />
+      {/* Applications List Section */}
+      <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+        <h2 className="text-xl font-extrabold text-gray-900 mb-6">My Applications</h2>
+        
+        <div className="flex flex-col gap-4">
+          {/* Sample Application Item 1 */}
+          <div className="p-4 rounded-xl bg-gray-50 border border-gray-100 flex items-center justify-between">
+            <div>
+              <h3 className="text-lg font-bold text-gray-900">Max</h3>
+              <p className="text-xs text-gray-500 mt-0.5">Applied: Oct 24, 2026</p>
+            </div>
+            <span className="px-3 py-1 text-xs font-bold text-amber-800 bg-amber-100 rounded-full">
+              Under Review
+            </span>
+          </div>
+
+          {/* Sample Application Item 2 */}
+          <div className="p-4 rounded-xl bg-gray-50 border border-gray-100 flex items-center justify-between">
+            <div>
+              <h3 className="text-lg font-bold text-gray-900">Luna</h3>
+              <p className="text-xs text-gray-500 mt-0.5">Applied: Oct 18, 2026</p>
+            </div>
+            <span className="px-3 py-1 text-xs font-bold text-[#426306] bg-[#e8f2d8] rounded-full">
+              Approved
+            </span>
+          </div>
         </div>
       </div>
     </div>

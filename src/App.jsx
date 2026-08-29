@@ -3,7 +3,7 @@ import { initialPetsData, initialApplications } from './data/petsData';
 
 // Components import
 import Header from './components/Header';
-
+import AuthFlow from './components/AuthFlow';
 
 // Pages import
 import Home from './pages/Home';
@@ -27,8 +27,10 @@ export default function App() {
   const [selectedPet, setSelectedPet] = useState(initialPetsData[0]);
   const [applications, setApplications] = useState(initialApplications);
 
- 
-  
+  // Auth States
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userRole, setUserRole] = useState(null); // 'adopter' or 'shelter'
+  const [userName, setUserName] = useState('');
 
   const handleSelectPet = (pet) => {
     setSelectedPet(pet);
@@ -40,13 +42,37 @@ export default function App() {
     setCurrentPage('apply');
   };
 
-  // favorite toggle korar handler
+  // Favorite toggle handler
   function handleToggleFavorite(petId) {
-  setPets(pets => pets.map(pet => pet.id === petId ? { ...pet, isFavorite: !pet.isFavorite } : pet));
-}
+    setPets((pets) =>
+      pets.map((pet) =>
+        pet.id === petId ? { ...pet, isFavorite: !pet.isFavorite } : pet
+      )
+    );
+  }
 
   const handleSubmitApplication = (newApp) => {
     setApplications((prev) => [newApp, ...prev]);
+  };
+
+  // Auth Handler Functions
+  const handleLogin = (role, name) => {
+    setIsLoggedIn(true);
+    setUserRole(role);
+    setUserName(name);
+    // Auto-redirect to proper dashboard after login
+    if (role === 'adopter') {
+      setCurrentPage('user-dashboard');
+    } else {
+      setCurrentPage('shelter-dashboard');
+    }
+  };
+
+  const handleLogout = () => {
+    setIsLoggedIn(false);
+    setUserRole(null);
+    setUserName('');
+    setCurrentPage('home');
   };
 
   const renderCurrentPage = () => {
@@ -67,6 +93,7 @@ export default function App() {
             pets={pets}
             onSelectPet={handleSelectPet}
             onToggleFavorite={handleToggleFavorite}
+            userRole={userRole}
           />
         );
 
@@ -130,6 +157,14 @@ export default function App() {
       case 'shelter-dashboard':
         return <ShelterDashboard onNavigate={setCurrentPage} />;
 
+      case 'auth':
+        return (
+          <AuthFlow
+            onLogin={handleLogin}
+            onCancel={() => setCurrentPage('home')}
+          />
+        );
+
       default:
         return (
           <Home
@@ -144,7 +179,15 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-[#f4fafd] text-[#161d1f] flex flex-col font-sans">
-      <Header currentPage={currentPage} onNavigate={setCurrentPage} />
+      <Header
+        currentPage={currentPage}
+        onNavigate={setCurrentPage}
+        isLoggedIn={isLoggedIn}
+        userRole={userRole}
+        userName={userName}
+        onOpenAuth={() => setCurrentPage('auth')}
+        onLogout={handleLogout}
+      />
       <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 sm:pt-6">
         {renderCurrentPage()}
       </main>

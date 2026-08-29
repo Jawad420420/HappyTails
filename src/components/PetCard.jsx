@@ -1,7 +1,7 @@
 // pet card component jeta list e render hoi
-import { Heart, MapPin, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Heart, MapPin, CheckCircle2, AlertCircle, X } from 'lucide-react';
 
-export default function PetCard({ pet, onSelectPet, onToggleFavorite }) {
+export default function PetCard({ pet, onSelectPet, onToggleFavorite, isShelterAdmin = false }) {
   return (
     <article
       onClick={() => onSelectPet(pet)}
@@ -16,26 +16,39 @@ export default function PetCard({ pet, onSelectPet, onToggleFavorite }) {
           loading="lazy"
         />
 
-        {/* favorite heart button */}
-        <button
-          type="button"
-          onClick={(e) => {
-            e.stopPropagation(); // card click thik thakar jonno
-            onToggleFavorite(pet.id);
-          }}
-          className={`absolute top-3 right-3 p-2 rounded-full backdrop-blur-md transition-all duration-200 active:scale-90 ${
-            pet.isFavorite
-              ? 'bg-[#ffffff] text-[#ba1a1a] shadow-md'
-              : 'bg-[#ffffff]/80 text-[#44493a] hover:bg-[#ffffff] hover:text-[#ba1a1a]'
-          }`}
-          title={pet.isFavorite ? 'Remove favorite' : 'Add to favorite'}
-        >
-          <Heart
-            className="w-5 h-5"
-            fill={pet.isFavorite ? '#ba1a1a' : 'none'}
-            strokeWidth={pet.isFavorite ? 2.5 : 2}
-          />
-        </button>
+        {/* Shelter Admin White Cross OR Regular User Favorite Heart */}
+        {isShelterAdmin ? (
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation(); // card click thik thakar jonno
+            }}
+            className="absolute top-3 right-3 p-2 rounded-full bg-[#ba1a1a] text-white shadow-md hover:bg-[#93000a] transition-all duration-200 active:scale-90"
+            title="Remove pet listing"
+          >
+            <X className="w-5 h-5 text-white" />
+          </button>
+        ) : (
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation(); // card click thik thakar jonno
+              onToggleFavorite(pet.id);
+            }}
+            className={`absolute top-3 right-3 p-2 rounded-full backdrop-blur-md transition-all duration-200 active:scale-90 ${
+              pet.isFavorite
+                ? 'bg-[#ffffff] text-[#ba1a1a] shadow-md'
+                : 'bg-[#ffffff]/80 text-[#44493a] hover:bg-[#ffffff] hover:text-[#ba1a1a]'
+            }`}
+            title={pet.isFavorite ? 'Remove favorite' : 'Add to favorite'}
+          >
+            <Heart
+              className="w-5 h-5"
+              fill={pet.isFavorite ? '#ba1a1a' : 'none'}
+              strokeWidth={pet.isFavorite ? 2.5 : 2}
+            />
+          </button>
+        )}
       </div>
 
       {/* pet details info */}

@@ -1,7 +1,9 @@
 import React from 'react';
-import { Heart } from 'lucide-react';
+import { Heart, X } from 'lucide-react';
 
-export default function PetGrid({ pets, onSelectPet, onToggleFavorite }) {
+export default function PetGrid({ pets, onSelectPet, onToggleFavorite, userRole }) {
+  const isShelterAdmin = userRole === 'shelter';
+
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
       {pets.map((pet) => (
@@ -16,19 +18,37 @@ export default function PetGrid({ pets, onSelectPet, onToggleFavorite }) {
               alt={pet.name}
               className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
             />
+            
+            {/* Action Button: Red Circle with White Cross for Shelter OR Heart for Adopters */}
             <div className="absolute top-3 right-3">
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onToggleFavorite(pet.id);
-                }}
-                className="p-2.5 bg-white/90 backdrop-blur-sm rounded-full shadow-md hover:bg-white transition-colors duration-200"
-              >
-                <Heart 
-                  className={`w-5 h-5 transition-colors duration-300 ${pet.isFavorite ? 'fill-red-500 text-red-500' : 'text-gray-400 hover:text-red-500'}`} 
-                />
-              </button>
+              {isShelterAdmin ? (
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation(); // Prevents opening pet details
+                  }}
+                  className="p-2.5 bg-[#ba1a1a] rounded-full shadow-md hover:bg-[#93000a] transition-colors duration-200"
+                  title="Remove pet listing"
+                >
+                  <X className="w-5 h-5 text-white" />
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onToggleFavorite(pet.id);
+                  }}
+                  className="p-2.5 bg-white/90 backdrop-blur-sm rounded-full shadow-md hover:bg-white transition-colors duration-200"
+                  title={pet.isFavorite ? 'Remove favorite' : 'Add to favorite'}
+                >
+                  <Heart 
+                    className={`w-5 h-5 transition-colors duration-300 ${pet.isFavorite ? 'fill-red-500 text-red-500' : 'text-gray-400 hover:text-red-500'}`} 
+                  />
+                </button>
+              )}
             </div>
+
             <div className="absolute bottom-3 left-3 flex gap-2">
               <span className="px-3 py-1 bg-white/90 backdrop-blur-sm text-xs font-semibold text-gray-700 rounded-full shadow-sm">
                 {pet.breed}

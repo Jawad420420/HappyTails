@@ -1,8 +1,17 @@
 import React, { useState } from 'react';
-import { Menu, PawPrint, Search, User, X } from 'lucide-react';
+import { Menu, PawPrint, User, X, LogOut, ChevronDown } from 'lucide-react';
 
-export default function Header({ currentPage, onNavigate }) {
+export default function Header({
+  currentPage,
+  onNavigate,
+  isLoggedIn = false,
+  userRole = null, // 'adopter' or 'shelter'
+  userName = '',
+  onOpenAuth,
+  onLogout
+}) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
 
   const navItems = [
     { id: 'home', label: 'Home' },
@@ -10,21 +19,30 @@ export default function Header({ currentPage, onNavigate }) {
     { id: 'shelters', label: 'Shelters' },
     { id: 'pet-care', label: 'Pet Care' },
     { id: 'stories', label: 'Stories' },
-    { id: 'user-dashboard', label: 'User Dashboard' },
-    { id: 'shelter-dashboard', label: 'Shelter Admin' },
-    { id: 'applications', label: 'My Applications' },
   ];
 
   const navigate = (page) => {
     onNavigate(page);
     setIsMenuOpen(false);
+    setIsProfileOpen(false);
+  };
+
+  const handleUserClick = () => {
+    const targetDashboard = userRole === 'shelter' ? 'shelter-dashboard' : 'user-dashboard';
+    onNavigate(targetDashboard);
+  };
+
+  const handleLogoutClick = () => {
+    setIsProfileOpen(false);
+    setIsMenuOpen(false);
+    if (onLogout) onLogout();
   };
 
   return (
     <>
       {/* Desktop Header */}
       <header className="hidden md:flex justify-between items-center px-4 xl:px-8 h-20 w-full z-50 bg-white/80 sticky top-0 border-b border-gray-100 backdrop-blur-xl shadow-sm">
-        {/* Restored Clean Single-Paw Logo */}
+        {/* Logo */}
         <div
           onClick={() => onNavigate('home')}
           className="flex items-center gap-2.5 cursor-pointer shrink-0"
@@ -37,7 +55,7 @@ export default function Header({ currentPage, onNavigate }) {
           </span>
         </div>
 
-        {/* Forced Single Line Nav Bar */}
+        {/* Public Navigation Links */}
         <nav className="flex items-center bg-gray-50/80 p-1.5 rounded-2xl border border-gray-100 overflow-x-auto max-w-[65vw]">
           <div className="flex items-center gap-1 min-w-max">
             {navItems.map((item) => {
@@ -61,25 +79,55 @@ export default function Header({ currentPage, onNavigate }) {
           </div>
         </nav>
 
-        {/* Action Buttons */}
-        <div className="flex items-center gap-2 xl:gap-3 shrink-0">
-          <button
-            type="button"
-            onClick={() => onNavigate('search')}
-            className="p-2 rounded-full hover:bg-gray-100 text-gray-600 hover:text-[#426306] transition"
-            title="Search pets"
-          >
-            <Search className="w-5 h-5" />
-          </button>
-          <button
-            type="button"
-            onClick={() => onNavigate('admin')}
-            style={{ whitespace: 'nowrap' }}
-            className="flex items-center gap-2 px-4 py-2 rounded-2xl bg-[#e8f2d8] text-[#426306] font-bold border border-[#d5e8b8] hover:bg-[#dcecc5] transition whitespace-nowrap"
-          >
-            <User className="w-4 h-4" />
-            Admin
-          </button>
+        {/* Action Buttons & Authentication Dropdown */}
+        <div className="flex items-center gap-2 xl:gap-3 shrink-0 relative">
+          {!isLoggedIn ? (
+            /* Logged Out View */
+            <button
+              type="button"
+              onClick={onOpenAuth}
+              style={{ whitespace: 'nowrap' }}
+              className="flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-[#426306] text-white font-bold hover:bg-[#344e05] transition whitespace-nowrap shadow-sm text-xs xl:text-sm"
+            >
+              Log In / Sign Up
+            </button>
+          ) : (
+            /* Logged In Profile Menu */
+            <div className="relative flex items-center gap-1 bg-[#e8f2d8] rounded-2xl p-1 border border-[#d5e8b8]">
+              {/* User Name Pill: Direct Navigation to Dashboard */}
+              <button
+                type="button"
+                onClick={handleUserClick}
+                className="flex items-center gap-2 px-3 py-1.5 text-[#426306] font-bold hover:bg-[#dcecc5] transition rounded-xl text-xs xl:text-sm"
+              >
+                <User className="w-4 h-4" />
+                <span>{userName}</span>
+              </button>
+
+              {/* Dropdown Toggle Trigger */}
+              <button
+                type="button"
+                onClick={() => setIsProfileOpen((prev) => !prev)}
+                className="p-1.5 text-[#426306] hover:bg-[#dcecc5] transition rounded-xl"
+              >
+                <ChevronDown className="w-4 h-4" />
+              </button>
+
+              {/* Minimal Profile Dropdown - Log Out Only */}
+              {isProfileOpen && (
+                <div className="absolute right-0 top-full mt-2 w-44 bg-white rounded-2xl border border-gray-100 shadow-xl py-1.5 z-50">
+                  <button
+                    type="button"
+                    onClick={handleLogoutClick}
+                    className="w-full text-left flex items-center gap-2 px-4 py-2 text-xs xl:text-sm font-semibold text-red-600 hover:bg-red-50 transition rounded-xl"
+                  >
+                    <LogOut className="w-4 h-4" />
+                    Log Out
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </header>
 
@@ -110,7 +158,7 @@ export default function Header({ currentPage, onNavigate }) {
         </button>
 
         {isMenuOpen && (
-          <div className="absolute top-full left-4 right-4 p-2 bg-white rounded-2xl border border-gray-100 shadow-xl">
+          <div className="absolute top-full left-4 right-4 p-2 bg-white rounded-2xl border border-gray-100 shadow-xl space-y-1">
             <nav className="flex flex-col gap-1">
               {navItems.map((item) => (
                 <button
@@ -125,6 +173,40 @@ export default function Header({ currentPage, onNavigate }) {
                 </button>
               ))}
             </nav>
+
+            <hr className="my-1 border-gray-100" />
+
+            {!isLoggedIn ? (
+              <button
+                type="button"
+                onClick={() => {
+                  setIsMenuOpen(false);
+                  onOpenAuth();
+                }}
+                className="w-full text-center px-4 py-2.5 rounded-xl text-sm font-bold bg-[#426306] text-white"
+              >
+                Log In / Sign Up
+              </button>
+            ) : (
+              <div className="space-y-1">
+                <button
+                  type="button"
+                  onClick={handleUserClick}
+                  className="w-full text-left px-4 py-2 rounded-xl text-sm font-bold text-[#426306] bg-[#e8f2d8] flex items-center gap-2"
+                >
+                  <User className="w-4 h-4" />
+                  Dashboard ({userName})
+                </button>
+                <button
+                  type="button"
+                  onClick={handleLogoutClick}
+                  className="w-full text-left px-4 py-2 rounded-xl text-sm font-semibold text-red-600 bg-red-50 flex items-center gap-2"
+                >
+                  <LogOut className="w-4 h-4" />
+                  Log Out
+                </button>
+              </div>
+            )}
           </div>
         )}
       </header>
