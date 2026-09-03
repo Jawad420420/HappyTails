@@ -10,7 +10,9 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "dotenv": "^17.4.2",
     "lucide-react": "^1.32.0",
+    "mongodb": "^7.6.0",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "react-router-dom": "^7.18.2"
@@ -24,5 +26,18 @@
     "postcss": "^8.5.26",
     "tailwindcss": "^3.4.19",
     "vite": "^8.2.0"
-  }
+  },
+  "description": "This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.",
+  "main": "eslint.config.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Jawad420420/HappyTails.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Jawad420420/HappyTails/issues"
+  },
+  "homepage": "https://github.com/Jawad420420/HappyTails#readme"
 }
