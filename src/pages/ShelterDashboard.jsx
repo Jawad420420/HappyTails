@@ -1,7 +1,8 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { Plus, Trash2, ClipboardList } from 'lucide-react';
 
-export default function ShelterDashboard({ onNavigate }) {
+export default function ShelterDashboard() {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       {/* Dashboard Title Banner */}
@@ -32,32 +33,29 @@ export default function ShelterDashboard({ onNavigate }) {
       <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 max-w-xl">
         <h2 className="text-lg font-extrabold text-gray-900 mb-4">Quick Actions</h2>
         <div className="flex flex-col gap-3">
-          <button
-            type="button"
-            onClick={() => onNavigate && onNavigate('add-pet')}
+          <Link
+            to="/add-pet"
             className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-[#426306] text-white font-bold hover:bg-[#344f05] transition shadow-sm"
           >
             <Plus className="w-4 h-4" />
             Add New Pet
-          </button>
+          </Link>
 
-          <button
-            type="button"
-            onClick={() => onNavigate && onNavigate('search')}
+          <Link
+            to="/search"
             className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-red-50 text-red-700 font-bold border border-red-200 hover:bg-red-100 transition"
           >
             <Trash2 className="w-4 h-4" />
             Remove a Pet
-          </button>
+          </Link>
 
-          <button
-            type="button"
-            onClick={() => onNavigate && onNavigate('applications')}
+          <Link
+            to="/applications"
             className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-[#e8f2d8] text-[#426306] font-bold border border-[#d5e8b8] hover:bg-[#dcecc5] transition"
           >
             <ClipboardList className="w-4 h-4" />
             Review Applications
-          </button>
+          </Link>
         </div>
       </div>
     </div>

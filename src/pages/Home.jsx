@@ -5,20 +5,19 @@ import FeaturedPets from '../components/home/FeaturedPets';
 import VolunteerCard from '../components/home/VolunteerCard';
 import HealthCard from '../components/home/HealthCard';
 
-export default function Home({ pets, onSelectPet, onToggleFavorite, onNavigate }) {
+export default function Home({ pets, onSelectPet, onToggleFavorite }) {
   return (
     <div className="w-full flex flex-col items-center">
-      <HeroSection onNavigate={onNavigate} />
+      <HeroSection />
       <AdoptionJourney />
 
-      <VolunteerCard onNavigate={onNavigate} />
-      <HealthCard onNavigate={onNavigate} />
+      <VolunteerCard />
+      <HealthCard />
 
       <FeaturedPets 
         pets={pets} 
         onSelectPet={onSelectPet} 
         onToggleFavorite={onToggleFavorite} 
-        onNavigate={onNavigate} 
       />
     </div>
   );

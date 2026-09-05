@@ -1,7 +1,10 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
+import BackButton from '../components/BackButton';
 import ApplicationForm from '../components/adoptionapply/ApplicationForm';
 
-export default function AdoptionApply({ selectedPet, onBack, onSubmitApplication }) {
+export default function AdoptionApply({ selectedPet, onSubmitApplication }) {
+  const navigate = useNavigate();
   const [formData, setFormData] = React.useState({
     fullName: '',
     email: '',
@@ -9,7 +12,6 @@ export default function AdoptionApply({ selectedPet, onBack, onSubmitApplication
     location: '',
     housingType: 'House',
     ownOrRent: 'Own',
-  
     termsAccepted: false,
   });
 
@@ -17,24 +19,26 @@ export default function AdoptionApply({ selectedPet, onBack, onSubmitApplication
     e.preventDefault();
     const newApp = {
       id: `app-${Date.now()}`,
-      petId: selectedPet.id,
-      petName: selectedPet.name,
-      petBreed: selectedPet.breed,
-      petAge: selectedPet.age,
-      petImage: selectedPet.mainImage,
-      shelterName: selectedPet.shelterName,
+      petId: selectedPet?.id || '',
+      petName: selectedPet?.name || 'Unknown Pet',
+      petBreed: selectedPet?.breed || '',
+      petAge: selectedPet?.age || '',
+      petImage: selectedPet?.mainImage || '',
+      shelterName: selectedPet?.shelterName || '',
       appliedDate: new Date().toLocaleDateString(),
       status: 'Under Review',
       ...formData,
     };
+    
     onSubmitApplication(newApp);
+    navigate('/applications');
   };
 
   return (
-    <div className="max-w-2xl mx-auto">
-      <button onClick={onBack} className="mb-4 text-[#426306] font-bold">
-        ← Back
-      </button>
+    <div className="max-w-2xl mx-auto py-6 px-4">
+      <div className="mb-6">
+        <BackButton to="/search" label="Back to Search" />
+      </div>
       <ApplicationForm 
         formData={formData} 
         setFormData={setFormData} 

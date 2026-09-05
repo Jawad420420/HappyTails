@@ -1,7 +1,8 @@
 import React from "react";
+import { Link } from "react-router-dom";
 import { HeartPulse } from "lucide-react";
 
-export default function HealthCard({ onNavigate }) {
+export default function HealthCard() {
   return (
     <section className="w-full max-w-5xl mx-auto px-6 my-10">
       <div className="bg-[#e8f2d8] rounded-3xl p-8 flex flex-col md:flex-row items-center justify-between gap-6 shadow-md hover:shadow-lg transition-all duration-300">
@@ -20,16 +21,13 @@ export default function HealthCard({ onNavigate }) {
           </p>
         </div>
 
-        {/* Action Button */}
-        <button
-          type="button"
-          onClick={() => {
-            if (onNavigate) onNavigate('vaccination');
-          }}
-          className="shrink-0 bg-[#426306] text-white px-7 py-3 rounded-xl font-bold hover:bg-[#344d05] transition active:scale-95"
+        {/* Action Link */}
+        <Link
+          to="/vaccination"
+          className="shrink-0 bg-[#426306] text-white px-7 py-3 rounded-xl font-bold hover:bg-[#344d05] transition active:scale-95 flex items-center justify-center"
         >
           View Health Records
-        </button>
+        </Link>
 
       </div>
     </section>

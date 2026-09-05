@@ -1,7 +1,8 @@
 import React from "react";
+import { Link } from "react-router-dom";
 import { Heart, PawPrint } from "lucide-react";
 
-export default function VolunteerCard({ onNavigate }) {
+export default function VolunteerCard() {
   return (
     <section className="w-full max-w-5xl mx-auto px-6 my-10">
       <div className="bg-[#e8f2d8] rounded-3xl p-8 flex flex-col md:flex-row items-center justify-between gap-6 shadow-md hover:shadow-lg transition-all duration-300">
@@ -24,17 +25,14 @@ export default function VolunteerCard({ onNavigate }) {
           </p>
         </div>
 
-        {/* Action Button */}
-        <button
-          type="button"
-          onClick={() => {
-            if (onNavigate) onNavigate('volunteer');
-          }}
+        {/* Action Link */}
+        <Link
+          to="/volunteer"
           className="shrink-0 bg-[#426306] text-white px-7 py-3 rounded-xl font-bold flex items-center gap-2 hover:bg-[#344d05] transition active:scale-95"
         >
           Become a Volunteer
           <Heart className="w-5 h-5" fill="currentColor" />
-        </button>
+        </Link>
 
       </div>
     </section>

@@ -2,14 +2,16 @@ import React, { useState } from 'react';
 import { MapPin, Phone, Mail } from 'lucide-react';
 
 const shelters = [
-  { id: 1, name: 'Happy Paws Shelter', location: 'Dhaka', phone: '+880 1711 000111', email: 'contact@happypaws.org', petsCount: 12, image:'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRB6UxIqvSaqMOFO7jvCC8tcrktLBRDSGTIAiy9UEBNxw&s=10' },
+  { id: 1, name: 'Happy Paws Shelter', location: 'Dhaka', phone: '+880 1711 000111', email: 'contact@happypaws.org', petsCount: 12, image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRB6UxIqvSaqMOFO7jvCC8tcrktLBRDSGTIAiy9UEBNxw&s=10' },
   { id: 2, name: 'Safe Haven Rescue', location: 'Gazipur', phone: '+880 1822 333444', email: 'info@safehaven.org', petsCount: 8, image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRzQFo6P-dh4bmf4Q4YS0EMqTAxDR-g8FPOnEa9H8yRHQ&s=10' },
   { id: 3, name: 'Paws & Claws Rescue', location: 'Narayanganj', phone: '+880 1933 555666', email: 'hello@pawsclaws.org', petsCount: 15, image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS82bsc2vVWB8hvMqdM8NqQ3fQvOwjmi3y4_dk4p5D3ug&s=10' }
 ];
 
-export default function Shelters({ onNavigate }) {
+export default function Shelters() {
   const [search, setSearch] = useState('');
-  const filtered = shelters.filter(s => s.name.toLowerCase().includes(search.toLowerCase()) || s.location.toLowerCase().includes(search.toLowerCase()));
+  const filtered = shelters.filter(
+    s => s.name.toLowerCase().includes(search.toLowerCase()) || s.location.toLowerCase().includes(search.toLowerCase())
+  );
 
   return (
     <div className="w-full max-w-6xl mx-auto py-6 space-y-6">

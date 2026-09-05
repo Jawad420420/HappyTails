@@ -1,6 +1,6 @@
 import React from 'react';
 
-export default function UserDashboard({ applications = [], onNavigate, userName = 'Sarah J.' }) {
+export default function UserDashboard({ applications = [], userName = 'Sarah J.' }) {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       {/* Dashboard Title Banner */}

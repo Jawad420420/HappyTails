@@ -1,35 +1,31 @@
 import React, { useState } from 'react';
+import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { Menu, PawPrint, User, X, LogOut, ChevronDown } from 'lucide-react';
 
 export default function Header({
-  currentPage,
-  onNavigate,
   isLoggedIn = false,
   userRole = null, // 'adopter' or 'shelter'
   userName = '',
   onOpenAuth,
   onLogout
 }) {
+  const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
 
   const navItems = [
-    { id: 'home', label: 'Home' },
-    { id: 'search', label: 'Find a Pet' },
-    { id: 'shelters', label: 'Shelters' },
-    { id: 'pet-care', label: 'Pet Care' },
-    { id: 'stories', label: 'Stories' },
+    { path: '/', label: 'Home' },
+    { path: '/search', label: 'Find a Pet' },
+    { path: '/shelters', label: 'Shelters' },
+    { path: '/pet-care', label: 'Pet Care' },
+    { path: '/stories', label: 'Stories' },
   ];
 
-  const navigate = (page) => {
-    onNavigate(page);
+  const handleUserClick = () => {
+    const targetDashboard = userRole === 'shelter' ? '/shelter-dashboard' : '/user-dashboard';
+    navigate(targetDashboard);
     setIsMenuOpen(false);
     setIsProfileOpen(false);
-  };
-
-  const handleUserClick = () => {
-    const targetDashboard = userRole === 'shelter' ? 'shelter-dashboard' : 'user-dashboard';
-    onNavigate(targetDashboard);
   };
 
   const handleLogoutClick = () => {
@@ -43,8 +39,8 @@ export default function Header({
       {/* Desktop Header */}
       <header className="hidden md:flex justify-between items-center px-4 xl:px-8 h-20 w-full z-50 bg-white/80 sticky top-0 border-b border-gray-100 backdrop-blur-xl shadow-sm">
         {/* Logo */}
-        <div
-          onClick={() => onNavigate('home')}
+        <Link
+          to="/"
           className="flex items-center gap-2.5 cursor-pointer shrink-0"
         >
           <div className="w-10 h-10 bg-[#426306] rounded-full flex items-center justify-center shrink-0">
@@ -53,29 +49,26 @@ export default function Header({
           <span className="text-lg xl:text-xl font-black text-[#161d1f] whitespace-nowrap">
             Happy Tails
           </span>
-        </div>
+        </Link>
 
         {/* Public Navigation Links */}
         <nav className="flex items-center bg-gray-50/80 p-1.5 rounded-2xl border border-gray-100 overflow-x-auto max-w-[65vw]">
           <div className="flex items-center gap-1 min-w-max">
-            {navItems.map((item) => {
-              const isActive = currentPage === item.id;
-              return (
-                <button
-                  type="button"
-                  key={item.id}
-                  onClick={() => onNavigate(item.id)}
-                  style={{ whitespace: 'nowrap' }}
-                  className={`px-3 py-2 text-xs xl:text-sm font-semibold transition-all rounded-xl whitespace-nowrap shrink-0 inline-block ${
+            {navItems.map((item) => (
+              <NavLink
+                key={item.path}
+                to={item.path}
+                className={({ isActive }) =>
+                  `px-3 py-2 text-xs xl:text-sm font-semibold transition-all rounded-xl whitespace-nowrap shrink-0 inline-block ${
                     isActive
                       ? 'bg-[#e8f2d8] text-[#426306] shadow-sm ring-1 ring-[#d5e8b8]'
                       : 'text-gray-600 hover:text-[#426306] hover:bg-gray-100/50'
-                  }`}
-                >
-                  {item.label}
-                </button>
-              );
-            })}
+                  }`
+                }
+              >
+                {item.label}
+              </NavLink>
+            ))}
           </div>
         </nav>
 
@@ -86,7 +79,6 @@ export default function Header({
             <button
               type="button"
               onClick={onOpenAuth}
-              style={{ whitespace: 'nowrap' }}
               className="flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-[#426306] text-white font-bold hover:bg-[#344e05] transition whitespace-nowrap shadow-sm text-xs xl:text-sm"
             >
               Log In / Sign Up
@@ -133,21 +125,19 @@ export default function Header({
 
       {/* Mobile Header */}
       <header className="relative flex md:hidden justify-between items-center px-5 h-16 w-full z-40 bg-white/80 sticky top-0 border-b border-gray-100 backdrop-blur-xl shadow-sm">
-        <button
-          type="button"
-          onClick={() => navigate('home')}
+        <Link
+          to="/"
           className="w-10 h-10 flex items-center justify-center rounded-full bg-[#426306]"
         >
           <PawPrint className="w-5 h-5 text-white" fill="currentColor" />
-        </button>
+        </Link>
 
-        <button
-          type="button"
-          onClick={() => navigate('home')}
+        <Link
+          to="/"
           className="text-xl font-extrabold text-[#426306]"
         >
           Happy Tails
-        </button>
+        </Link>
 
         <button
           type="button"
@@ -161,16 +151,18 @@ export default function Header({
           <div className="absolute top-full left-4 right-4 p-2 bg-white rounded-2xl border border-gray-100 shadow-xl space-y-1">
             <nav className="flex flex-col gap-1">
               {navItems.map((item) => (
-                <button
-                  type="button"
-                  key={item.id}
-                  onClick={() => navigate(item.id)}
-                  className={`w-full text-left px-4 py-2.5 rounded-xl text-sm font-semibold ${
-                    currentPage === item.id ? 'bg-[#e8f2d8] text-[#426306]' : 'text-gray-600'
-                  }`}
+                <NavLink
+                  key={item.path}
+                  to={item.path}
+                  onClick={() => setIsMenuOpen(false)}
+                  className={({ isActive }) =>
+                    `w-full text-left px-4 py-2.5 rounded-xl text-sm font-semibold ${
+                      isActive ? 'bg-[#e8f2d8] text-[#426306]' : 'text-gray-600'
+                    }`
+                  }
                 >
                   {item.label}
-                </button>
+                </NavLink>
               ))}
             </nav>
 

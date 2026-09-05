@@ -1,11 +1,12 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
+import { Routes, Route, useNavigate, Navigate } from 'react-router-dom';
 import { initialPetsData, initialApplications } from './data/petsData';
 
 // Components import
 import Header from './components/Header';
 import AuthFlow from './components/AuthFlow';
 
-// Pages import
+// Active Pages import
 import Home from './pages/Home';
 import FindPet from './pages/FindPet';
 import PetDetails from './pages/PetDetails';
@@ -14,7 +15,6 @@ import MyApplications from './pages/MyApplications';
 import AddPet from './pages/AddPet';
 import Volunteer from './pages/Volunteer';
 import Vaccination from './pages/Vaccination';
-import AdminDashboard from './pages/AdminDashboard';
 import UserDashboard from './pages/UserDashboard';
 import Shelters from './pages/Shelters';
 import PetCareGuide from './pages/PetCareGuide';
@@ -22,7 +22,7 @@ import SuccessStories from './pages/SuccessStories';
 import ShelterDashboard from './pages/ShelterDashboard';
 
 export default function App() {
-  const [currentPage, setCurrentPage] = useState('home');
+  const navigate = useNavigate();
   const [pets, setPets] = useState(initialPetsData);
   const [selectedPet, setSelectedPet] = useState(initialPetsData[0]);
   const [applications, setApplications] = useState(initialApplications);
@@ -34,18 +34,18 @@ export default function App() {
 
   const handleSelectPet = (pet) => {
     setSelectedPet(pet);
-    setCurrentPage('pet-details');
+    navigate('/pet-details');
   };
 
   const handleApplyPet = (pet) => {
     setSelectedPet(pet);
-    setCurrentPage('apply');
+    navigate('/apply');
   };
 
   // Favorite toggle handler
   function handleToggleFavorite(petId) {
-    setPets((pets) =>
-      pets.map((pet) =>
+    setPets((prevPets) =>
+      prevPets.map((pet) =>
         pet.id === petId ? { ...pet, isFavorite: !pet.isFavorite } : pet
       )
     );
@@ -62,9 +62,9 @@ export default function App() {
     setUserName(name);
     // Auto-redirect to proper dashboard after login
     if (role === 'adopter') {
-      setCurrentPage('user-dashboard');
+      navigate('/user-dashboard');
     } else {
-      setCurrentPage('shelter-dashboard');
+      navigate('/shelter-dashboard');
     }
   };
 
@@ -72,124 +72,93 @@ export default function App() {
     setIsLoggedIn(false);
     setUserRole(null);
     setUserName('');
-    setCurrentPage('home');
-  };
-
-  const renderCurrentPage = () => {
-    switch (currentPage) {
-      case 'home':
-        return (
-          <Home
-            pets={pets}
-            onSelectPet={handleSelectPet}
-            onToggleFavorite={handleToggleFavorite}
-            onNavigate={setCurrentPage}
-          />
-        );
-
-      case 'search':
-        return (
-          <FindPet
-            pets={pets}
-            onSelectPet={handleSelectPet}
-            onToggleFavorite={handleToggleFavorite}
-            userRole={userRole}
-          />
-        );
-
-      case 'pet-details':
-        return (
-          <PetDetails
-            pet={selectedPet}
-            onBack={() => setCurrentPage('search')}
-            onApply={handleApplyPet}
-            onToggleFavorite={handleToggleFavorite}
-            onNavigate={setCurrentPage}
-          />
-        );
-
-      case 'apply':
-        return (
-          <AdoptionApply
-            selectedPet={selectedPet}
-            onBack={() => setCurrentPage('applications')}
-            onSubmitApplication={handleSubmitApplication}
-          />
-        );
-
-      case 'applications':
-        return (
-          <MyApplications
-            applications={applications}
-            onNavigate={setCurrentPage}
-          />
-        );
-
-      case 'add-pet':
-        return <AddPet onNavigate={setCurrentPage} />;
-
-      case 'volunteer':
-        return <Volunteer onNavigate={setCurrentPage} />;
-
-      case 'vaccination':
-        return <Vaccination onNavigate={setCurrentPage} />;
-
-      case 'admin':
-        return <AdminDashboard onNavigate={setCurrentPage} />;
-
-      case 'user-dashboard':
-        return (
-          <UserDashboard
-            applications={applications}
-            onNavigate={setCurrentPage}
-          />
-        );
-
-      case 'shelters':
-        return <Shelters onNavigate={setCurrentPage} />;
-
-      case 'pet-care':
-        return <PetCareGuide onNavigate={setCurrentPage} />;
-
-      case 'stories':
-        return <SuccessStories onNavigate={setCurrentPage} />;
-
-      case 'shelter-dashboard':
-        return <ShelterDashboard onNavigate={setCurrentPage} />;
-
-      case 'auth':
-        return (
-          <AuthFlow
-            onLogin={handleLogin}
-            onCancel={() => setCurrentPage('home')}
-          />
-        );
-
-      default:
-        return (
-          <Home
-            pets={pets}
-            onSelectPet={handleSelectPet}
-            onToggleFavorite={handleToggleFavorite}
-            onNavigate={setCurrentPage}
-          />
-        );
-    }
+    navigate('/');
   };
 
   return (
     <div className="min-h-screen bg-[#f4fafd] text-[#161d1f] flex flex-col font-sans">
       <Header
-        currentPage={currentPage}
-        onNavigate={setCurrentPage}
         isLoggedIn={isLoggedIn}
         userRole={userRole}
         userName={userName}
-        onOpenAuth={() => setCurrentPage('auth')}
+        onOpenAuth={() => navigate('/auth')}
         onLogout={handleLogout}
       />
       <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 sm:pt-6">
-        {renderCurrentPage()}
+        <Routes>
+          {/* Main Pages */}
+          <Route
+            path="/"
+            element={
+              <Home
+                pets={pets}
+                onSelectPet={handleSelectPet}
+                onToggleFavorite={handleToggleFavorite}
+              />
+            }
+          />
+          <Route
+            path="/search"
+            element={
+              <FindPet
+                pets={pets}
+                onSelectPet={handleSelectPet}
+                onToggleFavorite={handleToggleFavorite}
+                userRole={userRole}
+              />
+            }
+          />
+          <Route
+            path="/pet-details"
+            element={
+              <PetDetails
+                pet={selectedPet}
+                onApply={handleApplyPet}
+                onToggleFavorite={handleToggleFavorite}
+              />
+            }
+          />
+          <Route
+            path="/apply"
+            element={
+              <AdoptionApply
+                selectedPet={selectedPet}
+                onSubmitApplication={handleSubmitApplication}
+              />
+            }
+          />
+          <Route
+            path="/applications"
+            element={<MyApplications applications={applications} />}
+          />
+
+          {/* Form & Info Pages */}
+          <Route path="/add-pet" element={<AddPet />} />
+          <Route path="/volunteer" element={<Volunteer />} />
+          <Route path="/vaccination" element={<Vaccination />} />
+          <Route path="/shelters" element={<Shelters />} />
+          <Route path="/pet-care" element={<PetCareGuide />} />
+          <Route path="/stories" element={<SuccessStories />} />
+
+          {/* Dashboards & Auth */}
+          <Route
+            path="/user-dashboard"
+            element={<UserDashboard applications={applications} />}
+          />
+          <Route path="/shelter-dashboard" element={<ShelterDashboard />} />
+          <Route
+            path="/auth"
+            element={
+              <AuthFlow
+                onLogin={handleLogin}
+                onCancel={() => navigate('/')}
+              />
+            }
+          />
+
+          {/* Wildcard Fallback */}
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
       </main>
     </div>
   );
