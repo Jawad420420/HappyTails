@@ -2,12 +2,12 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Plus, Trash2, ClipboardList } from 'lucide-react';
 
-export default function ShelterDashboard() {
+export default function ShelterDashboard({ userName = 'Shelter Admin' }) {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       {/* Dashboard Title Banner */}
       <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 mb-8">
-        <h1 className="text-2xl font-black text-gray-900">Shelter Admin Dashboard</h1>
+        <h1 className="text-2xl font-black text-gray-900">{userName} Dashboard</h1>
         <p className="text-sm text-gray-500 mt-1">
           Manage listings, review adoption requests, and track activities.
         </p>

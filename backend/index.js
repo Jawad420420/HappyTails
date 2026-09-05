@@ -5,13 +5,18 @@ import cors from "cors";
 import authRoutes from "./routes/authRoutes.js";
 
 const app = express();
-app.use(cors());
+app.use(
+  cors({
+    origin: process.env.FRONTEND_URL || "http://localhost:5173",
+    credentials: true,
+  })
+);
 app.use(express.json());
 app.use("/api/auth", authRoutes);
 
 const connectDB = async () => {
   try {
-    await mongoose.connect(process.env.DATABASE_URL);
+    await mongoose.connect(process.env.MONGODB_URI);
     console.log("Connected to database");
   } catch (err) {
     console.log(`Error connecting to database ${err}`);

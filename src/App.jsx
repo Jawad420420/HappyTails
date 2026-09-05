@@ -1,10 +1,12 @@
 import { useState } from 'react';
 import { Routes, Route, useNavigate, Navigate } from 'react-router-dom';
 import { initialPetsData, initialApplications } from './data/petsData';
+import { saveSession, clearSession, getStoredUser } from './lib/auth';
 
 // Components import
 import Header from './components/Header';
 import AuthFlow from './components/AuthFlow';
+import ProtectedRoute from './components/ProtectedRoute';
 
 // Active Pages import
 import Home from './pages/Home';
@@ -27,10 +29,11 @@ export default function App() {
   const [selectedPet, setSelectedPet] = useState(initialPetsData[0]);
   const [applications, setApplications] = useState(initialApplications);
 
-  // Auth States
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [userRole, setUserRole] = useState(null); // 'adopter' or 'shelter'
-  const [userName, setUserName] = useState('');
+  // Auth States (restored from localStorage on load, so refreshes keep the session)
+  const storedUser = getStoredUser();
+  const [isLoggedIn, setIsLoggedIn] = useState(!!storedUser);
+  const [userRole, setUserRole] = useState(storedUser?.role || null); // 'adopter' or 'shelter'
+  const [userName, setUserName] = useState(storedUser?.name || '');
 
   const handleSelectPet = (pet) => {
     setSelectedPet(pet);
@@ -56,12 +59,13 @@ export default function App() {
   };
 
   // Auth Handler Functions
-  const handleLogin = (role, name) => {
+  const handleLogin = (user, token) => {
+    saveSession(token, user);
     setIsLoggedIn(true);
-    setUserRole(role);
-    setUserName(name);
+    setUserRole(user.role);
+    setUserName(user.name);
     // Auto-redirect to proper dashboard after login
-    if (role === 'adopter') {
+    if (user.role === 'adopter') {
       navigate('/user-dashboard');
     } else {
       navigate('/shelter-dashboard');
@@ -69,6 +73,7 @@ export default function App() {
   };
 
   const handleLogout = () => {
+    clearSession();
     setIsLoggedIn(false);
     setUserRole(null);
     setUserName('');
@@ -129,11 +134,22 @@ export default function App() {
           />
           <Route
             path="/applications"
-            element={<MyApplications applications={applications} />}
+            element={
+              <ProtectedRoute isLoggedIn={isLoggedIn} userRole={userRole} allowedRole="adopter">
+                <MyApplications applications={applications} />
+              </ProtectedRoute>
+            }
           />
 
           {/* Form & Info Pages */}
-          <Route path="/add-pet" element={<AddPet />} />
+          <Route
+            path="/add-pet"
+            element={
+              <ProtectedRoute isLoggedIn={isLoggedIn} userRole={userRole} allowedRole="shelter">
+                <AddPet />
+              </ProtectedRoute>
+            }
+          />
           <Route path="/volunteer" element={<Volunteer />} />
           <Route path="/vaccination" element={<Vaccination />} />
           <Route path="/shelters" element={<Shelters />} />
@@ -143,9 +159,20 @@ export default function App() {
           {/* Dashboards & Auth */}
           <Route
             path="/user-dashboard"
-            element={<UserDashboard applications={applications} />}
+            element={
+              <ProtectedRoute isLoggedIn={isLoggedIn} userRole={userRole} allowedRole="adopter">
+                <UserDashboard applications={applications} userName={userName} />
+              </ProtectedRoute>
+            }
           />
-          <Route path="/shelter-dashboard" element={<ShelterDashboard />} />
+          <Route
+            path="/shelter-dashboard"
+            element={
+              <ProtectedRoute isLoggedIn={isLoggedIn} userRole={userRole} allowedRole="shelter">
+                <ShelterDashboard userName={userName} />
+              </ProtectedRoute>
+            }
+          />
           <Route
             path="/auth"
             element={

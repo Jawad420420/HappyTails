@@ -5,7 +5,7 @@ export default function UserDashboard({ applications = [], userName = 'Sarah J.'
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       {/* Dashboard Title Banner */}
       <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 mb-8">
-        <h1 className="text-2xl font-black text-gray-900">User Dashboard</h1>
+        <h1 className="text-2xl font-black text-gray-900">Welcome back, {userName}!</h1>
         <p className="text-sm text-gray-500 mt-1">
           Track your adoption applications and manage your saved favorites.
         </p>
