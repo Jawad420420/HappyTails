@@ -3,6 +3,8 @@ import mongoose from "mongoose";
 import "dotenv/config";
 import cors from "cors";
 import authRoutes from "./routes/authRoutes.js";
+import adoptionRoutes from "./routes/adoptionRoutes.js";
+import vaccinationRoutes from "./routes/vaccinationRoutes.js";
 
 const app = express();
 app.use(
@@ -13,6 +15,8 @@ app.use(
 );
 app.use(express.json());
 app.use("/api/auth", authRoutes);
+app.use("/api/adoptions", adoptionRoutes);
+app.use("/api/vaccinations", vaccinationRoutes);
 
 const connectDB = async () => {
   try {

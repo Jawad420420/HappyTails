@@ -40,3 +40,23 @@ export const submitAdoption = (data) =>
   });
 
 export const getMyAdoptions = () => request('/adoptions/my');
+
+// Vaccinations
+export const addVaccination = (data) =>
+  request('/vaccinations', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+
+export const updateVaccination = (id, data) =>
+  request(`/vaccinations/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  });
+
+export const getMyVaccinations = () => request('/vaccinations');
+
+export const deleteVaccination = (id) =>
+  request(`/vaccinations/${id}`, {
+    method: 'DELETE',
+  });
