@@ -1,9 +1,18 @@
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+import { getToken } from './auth';
+
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000/api';
 
 async function request(path, options = {}) {
+  const token = getToken();
+  const headers = {
+    'Content-Type': 'application/json',
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    ...options.headers,
+  };
+
   const res = await fetch(`${API_BASE_URL}${path}`, {
-    headers: { 'Content-Type': 'application/json' },
     ...options,
+    headers,
   });
 
   let data = null;
@@ -20,10 +29,11 @@ async function request(path, options = {}) {
   return data;
 }
 
-export const signup = ({ name, email, password, role }) =>
+// Auth
+export const signup = ({ name, email, password }) =>
   request('/auth/signup', {
     method: 'POST',
-    body: JSON.stringify({ name, email, password, role }),
+    body: JSON.stringify({ name, email, password }),
   });
 
 export const login = ({ email, password }) =>
@@ -31,6 +41,8 @@ export const login = ({ email, password }) =>
     method: 'POST',
     body: JSON.stringify({ email, password }),
   });
+
+export const getAllUsers = () => request('/auth/users');
 
 // Pets
 export const getPets = (params = {}) => {
@@ -63,6 +75,14 @@ export const submitAdoption = (data) =>
   });
 
 export const getMyAdoptions = () => request('/adoptions/my');
+
+export const getAllAdoptions = () => request('/adoptions');
+
+export const updateAdoptionStatus = (id, status) =>
+  request(`/adoptions/${id}/status`, {
+    method: 'PATCH',
+    body: JSON.stringify({ status }),
+  });
 
 // Vaccinations
 export const addVaccination = (data) =>

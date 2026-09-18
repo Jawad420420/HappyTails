@@ -3,8 +3,9 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "dev": "node backend/index.js",
-    "start": "node backend/index.js"
+    "dev": "node index.js",
+    "start": "node index.js",
+    "seed": "node seed.js"
   },
   "dependencies": {
     "bcrypt": "^6.0.0",

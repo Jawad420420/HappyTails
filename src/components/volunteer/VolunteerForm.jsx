@@ -1,184 +1,205 @@
-import React from "react";
-import { Heart, PawPrint } from "lucide-react";
-import volunteerImage from "../../assets/volun5.jpg";
-
+import React, { useState } from 'react';
+import { Heart, PawPrint, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { getStoredUser } from '../../lib/auth';
 
 export default function VolunteerForm() {
+  const storedUser = getStoredUser();
 
-  const inputBox = `
-  w-full
-  px-4
-  py-3
-  bg-gray-50
-  border
-  border-gray-200
-  rounded-xl
-  outline-none
-  focus:bg-white
-  focus:ring-2
-  focus:ring-[#426306]
-  transition
-  `;
+  const [form, setForm] = useState({
+    name: storedUser?.name || '',
+    email: storedUser?.email || '',
+    phone: '',
+    location: '',
+    workType: 'Pet Care',
+    availability: 'Weekends',
+    message: '',
+  });
 
+  const [status, setStatus] = useState('idle'); // idle | loading | success | error
+  const [errorMsg, setErrorMsg] = useState('');
+
+  const handleChange = (e) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    setStatus('loading');
+    setErrorMsg('');
+
+    // Mock client-side submission
+    setTimeout(() => {
+      setStatus('success');
+    }, 600);
+  };
+
+  const inputBox =
+    'w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:bg-white focus:ring-2 focus:ring-[#426306] transition text-sm';
 
   return (
-
-    <div className="
-      bg-white
-      rounded-3xl
-      shadow-xl
-      p-6
-      md:p-8
-      border
-      border-gray-100
-    ">
-
-
+    <div className="bg-white rounded-3xl shadow-sm p-6 md:p-8 border border-gray-100">
       {/* Header */}
-
-      <div className="flex items-center gap-3 mb-6">
-
-        <h1 className="
-          text-3xl
-          font-extrabold
-          text-[#161d1f]
-        ">
-          Become a Volunteer
-        </h1>
-
-
-        <PawPrint
-          className="
-          w-8
-          h-8
-          text-[#426306]
-          "
-          fill="currentColor"
-        />
-
+      <div className="flex items-center gap-3 mb-4">
+        <div className="w-10 h-10 bg-[#e8f2d8] rounded-2xl flex items-center justify-center text-[#426306]">
+          <PawPrint className="w-5 h-5" />
+        </div>
+        <div>
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-[#161d1f]">
+            Become a Volunteer
+          </h1>
+          <p className="text-gray-500 text-xs sm:text-sm mt-0.5">
+            Help animals find care, love, and a forever home. Join our volunteer team today!
+          </p>
+        </div>
       </div>
 
-
-
-      <p className="text-gray-500 mb-6">
-        Help animals find care, love and a forever home.
-        Join our volunteer community today.
-      </p>
-
-
-
-
-      {/* Image Area */}
-
-      <div className="
-        mb-6
-        rounded-2xl
-        overflow-hidden
-        bg-gray-100
-      ">
-
+      {/* Hero Banner Image */}
+      <div className="mb-6 rounded-2xl overflow-hidden bg-gray-100 h-48 sm:h-56 relative">
         <img
-
-          src={volunteerImage}
-
-          className="
-          w-full
-          h-56
-          object-cover
-          "
-
+          src="https://images.unsplash.com/photo-1548767797-d8c844163c4c?auto=format&fit=crop&w=1200&q=80"
+          alt="Volunteers with pets"
+          className="w-full h-full object-cover"
         />
-
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent flex items-end p-4 sm:p-6">
+          <p className="text-white text-sm sm:text-base font-semibold">
+            Every minute you dedicate brings hope to rescue animals in need.
+          </p>
+        </div>
       </div>
 
+      {status === 'success' ? (
+        <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-6 text-center space-y-3">
+          <CheckCircle2 className="w-12 h-12 text-emerald-600 mx-auto" />
+          <h3 className="text-lg font-bold text-emerald-900">Application Submitted!</h3>
+          <p className="text-sm text-emerald-700 max-w-md mx-auto">
+            Thank you for stepping up to help! Our team has received your application. We will contact
+            you soon via email.
+          </p>
+          <div className="pt-2">
+            <Link
+              to="/user-dashboard"
+              className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#426306] text-white text-xs font-bold rounded-xl hover:bg-[#344e05] transition"
+            >
+              Back to Dashboard
+            </Link>
+          </div>
+        </div>
+      ) : (
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-semibold text-gray-700 mb-1">Full Name *</label>
+              <input
+                name="name"
+                placeholder="Full Name"
+                className={inputBox}
+                value={form.name}
+                onChange={handleChange}
+                required
+              />
+            </div>
 
+            <div>
+              <label className="block text-xs font-semibold text-gray-700 mb-1">Email Address *</label>
+              <input
+                name="email"
+                type="email"
+                placeholder="Email Address"
+                className={inputBox}
+                value={form.email}
+                onChange={handleChange}
+                required
+              />
+            </div>
 
+            <div>
+              <label className="block text-xs font-semibold text-gray-700 mb-1">Phone Number *</label>
+              <input
+                name="phone"
+                placeholder="Phone Number"
+                className={inputBox}
+                value={form.phone}
+                onChange={handleChange}
+                required
+              />
+            </div>
 
-      {/* Form Fields */}
+            <div>
+              <label className="block text-xs font-semibold text-gray-700 mb-1">City / Area</label>
+              <input
+                name="location"
+                placeholder="e.g. Dhanmondi, Dhaka"
+                className={inputBox}
+                value={form.location}
+                onChange={handleChange}
+              />
+            </div>
 
-      <div className="
-        grid
-        grid-cols-1
-        md:grid-cols-2
-        gap-5
-      ">
+            <div>
+              <label className="block text-xs font-semibold text-gray-700 mb-1">Role / Work Type *</label>
+              <select
+                name="workType"
+                className={inputBox}
+                value={form.workType}
+                onChange={handleChange}
+                required
+              >
+                <option value="Pet Care">Pet Care & Feeding</option>
+                <option value="Dog Walking">Dog Walking & Exercise</option>
+                <option value="Fostering">Temporary Fostering</option>
+                <option value="Event Support">Adoption Events & Outreach</option>
+                <option value="Administrative">Administrative & Coordination</option>
+              </select>
+            </div>
 
+            <div>
+              <label className="block text-xs font-semibold text-gray-700 mb-1">Your Availability *</label>
+              <select
+                name="availability"
+                className={inputBox}
+                value={form.availability}
+                onChange={handleChange}
+                required
+              >
+                <option value="Weekends">Weekends Only</option>
+                <option value="Weekdays">Weekdays</option>
+                <option value="Evenings">Evenings</option>
+                <option value="Flexible">Flexible / On-call</option>
+              </select>
+            </div>
+          </div>
 
-        <input
-          placeholder="Full Name"
-          className={inputBox}
-        />
+          <div>
+            <label className="block text-xs font-semibold text-gray-700 mb-1">
+              Why do you want to volunteer?
+            </label>
+            <textarea
+              name="message"
+              placeholder="Tell us a little about your experience with animals and why you want to join..."
+              className={`${inputBox} h-28 resize-none`}
+              value={form.message}
+              onChange={handleChange}
+            />
+          </div>
 
+          {status === 'error' && (
+            <div className="bg-red-50 border border-red-200 text-red-700 p-3 rounded-xl text-xs font-medium flex items-center gap-2">
+              <AlertCircle className="w-4 h-4 shrink-0" />
+              <span>{errorMsg}</span>
+            </div>
+          )}
 
-        <input
-          placeholder="Email Address"
-          className={inputBox}
-        />
-
-
-        <input
-          placeholder="Phone Number"
-          className={inputBox}
-        />
-
-
-        <input
-          placeholder="Location"
-          className={inputBox}
-        />
-
-
-      </div>
-
-
-
-
-      <textarea
-
-        placeholder="Why do you want to volunteer?"
-
-        className={`${inputBox} mt-5 h-32 resize-none`}
-
-      />
-
-
-
-
-
-      {/* Button */}
-
-      <button
-
-        className="
-        mt-8
-        w-full
-        bg-[#426306]
-        text-white
-        py-3
-        rounded-xl
-        font-bold
-        flex
-        justify-center
-        items-center
-        gap-2
-        hover:bg-[#344d05]
-        transition
-        active:scale-95
-        "
-
-      >
-
-        Join Volunteer Team
-
-        <Heart
-          className="w-5 h-5"
-          fill="currentColor"
-        />
-
-      </button>
-
-
+          <button
+            type="submit"
+            disabled={status === 'loading'}
+            className="w-full bg-[#426306] text-white py-3.5 rounded-xl font-bold flex justify-center items-center gap-2 hover:bg-[#344d05] transition active:scale-95 disabled:opacity-60 text-sm shadow-sm"
+          >
+            <Heart className="w-4 h-4" fill="currentColor" />
+            {status === 'loading' ? 'Submitting Application...' : 'Join Volunteer Team'}
+          </button>
+        </form>
+      )}
     </div>
-
   );
 }

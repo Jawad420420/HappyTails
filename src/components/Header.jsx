@@ -1,29 +1,30 @@
 import React, { useState } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
-import { Menu, PawPrint, User, X, LogOut, ChevronDown } from 'lucide-react';
+import { Menu, PawPrint, User, Shield, X, LogOut, ChevronDown } from 'lucide-react';
 
 export default function Header({
   isLoggedIn = false,
-  userRole = null, // 'adopter' or 'shelter'
+  userRole = null, // 'user' or 'admin'
   userName = '',
   onOpenAuth,
-  onLogout
+  onLogout,
 }) {
   const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
 
+  // Admin cannot see Volunteer in navbar
   const navItems = [
     { path: '/', label: 'Home' },
     { path: '/search', label: 'Find a Pet' },
-    { path: '/shelters', label: 'Shelters' },
-    { path: '/pet-care', label: 'Pet Care' },
-    { path: '/stories', label: 'Stories' },
-  ];
+    { path: '/volunteer', label: 'Volunteer' },
+    { path: '/vaccination', label: 'Vaccination' },
+    { path: '/pet-care', label: 'Pet Care Guide' },
+  ].filter((item) => !(userRole === 'admin' && item.path === '/volunteer'));
 
-  const handleUserClick = () => {
-    const targetDashboard = userRole === 'shelter' ? '/shelter-dashboard' : '/user-dashboard';
-    navigate(targetDashboard);
+  const handleDashboardClick = () => {
+    const target = userRole === 'admin' ? '/admin-dashboard' : '/user-dashboard';
+    navigate(target);
     setIsMenuOpen(false);
     setIsProfileOpen(false);
   };
@@ -37,32 +38,32 @@ export default function Header({
   return (
     <>
       {/* Desktop Header */}
-      <header className="hidden md:flex justify-between items-center px-4 xl:px-8 h-20 w-full z-50 bg-white/80 sticky top-0 border-b border-gray-100 backdrop-blur-xl shadow-sm">
+      <header className="hidden md:flex justify-between items-center px-4 xl:px-8 h-20 w-full z-50 bg-white/90 sticky top-0 border-b border-gray-100 backdrop-blur-xl shadow-sm">
         {/* Logo */}
         <Link
           to="/"
           className="flex items-center gap-2.5 cursor-pointer shrink-0"
         >
-          <div className="w-10 h-10 bg-[#426306] rounded-full flex items-center justify-center shrink-0">
+          <div className="w-10 h-10 bg-[#426306] rounded-full flex items-center justify-center shrink-0 shadow-sm">
             <PawPrint className="w-5 h-5 text-white" fill="currentColor" />
           </div>
-          <span className="text-lg xl:text-xl font-black text-[#161d1f] whitespace-nowrap">
+          <span className="text-lg xl:text-xl font-black text-[#161d1f] whitespace-nowrap tracking-tight">
             Happy Tails
           </span>
         </Link>
 
         {/* Public Navigation Links */}
-        <nav className="flex items-center bg-gray-50/80 p-1.5 rounded-2xl border border-gray-100 overflow-x-auto max-w-[65vw]">
+        <nav className="flex items-center bg-gray-50/90 p-1.5 rounded-2xl border border-gray-200/60 overflow-x-auto max-w-[60vw]">
           <div className="flex items-center gap-1 min-w-max">
             {navItems.map((item) => (
               <NavLink
                 key={item.path}
                 to={item.path}
                 className={({ isActive }) =>
-                  `px-3 py-2 text-xs xl:text-sm font-semibold transition-all rounded-xl whitespace-nowrap shrink-0 inline-block ${
+                  `px-3.5 py-2 text-xs xl:text-sm font-semibold transition-all rounded-xl whitespace-nowrap shrink-0 inline-block ${
                     isActive
                       ? 'bg-[#e8f2d8] text-[#426306] shadow-sm ring-1 ring-[#d5e8b8]'
-                      : 'text-gray-600 hover:text-[#426306] hover:bg-gray-100/50'
+                      : 'text-gray-600 hover:text-[#426306] hover:bg-gray-100/60'
                   }`
                 }
               >
@@ -75,7 +76,6 @@ export default function Header({
         {/* Action Buttons & Authentication Dropdown */}
         <div className="flex items-center gap-2 xl:gap-3 shrink-0 relative">
           {!isLoggedIn ? (
-            /* Logged Out View */
             <button
               type="button"
               onClick={onOpenAuth}
@@ -84,19 +84,32 @@ export default function Header({
               Log In / Sign Up
             </button>
           ) : (
-            /* Logged In Profile Menu */
             <div className="relative flex items-center gap-1 bg-[#e8f2d8] rounded-2xl p-1 border border-[#d5e8b8]">
-              {/* User Name Pill: Direct Navigation to Dashboard */}
+              {/* User / Admin Pill Button */}
               <button
                 type="button"
-                onClick={handleUserClick}
+                onClick={handleDashboardClick}
                 className="flex items-center gap-2 px-3 py-1.5 text-[#426306] font-bold hover:bg-[#dcecc5] transition rounded-xl text-xs xl:text-sm"
               >
-                <User className="w-4 h-4" />
-                <span>{userName}</span>
+                {userRole === 'admin' ? (
+                  <>
+                    <Shield className="w-4 h-4 text-amber-700" />
+                    <span className="flex items-center gap-1.5">
+                      {userName || 'Admin'}
+                      <span className="bg-amber-100 text-amber-800 text-[10px] px-1.5 py-0.5 rounded font-bold uppercase">
+                        Admin
+                      </span>
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    <User className="w-4 h-4" />
+                    <span>{userName || 'User'}</span>
+                  </>
+                )}
               </button>
 
-              {/* Dropdown Toggle Trigger */}
+              {/* Dropdown Toggle */}
               <button
                 type="button"
                 onClick={() => setIsProfileOpen((prev) => !prev)}
@@ -105,13 +118,26 @@ export default function Header({
                 <ChevronDown className="w-4 h-4" />
               </button>
 
-              {/* Minimal Profile Dropdown - Log Out Only */}
+              {/* Dropdown Menu */}
               {isProfileOpen && (
-                <div className="absolute right-0 top-full mt-2 w-44 bg-white rounded-2xl border border-gray-100 shadow-xl py-1.5 z-50">
+                <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-2xl border border-gray-100 shadow-xl py-1.5 z-50">
+                  <button
+                    type="button"
+                    onClick={handleDashboardClick}
+                    className="w-full text-left flex items-center gap-2 px-4 py-2.5 text-xs xl:text-sm font-semibold text-gray-700 hover:bg-gray-50 transition"
+                  >
+                    {userRole === 'admin' ? (
+                      <Shield className="w-4 h-4 text-amber-600" />
+                    ) : (
+                      <User className="w-4 h-4 text-[#426306]" />
+                    )}
+                    {userRole === 'admin' ? 'Admin Dashboard' : 'My Dashboard'}
+                  </button>
+                  <hr className="my-1 border-gray-100" />
                   <button
                     type="button"
                     onClick={handleLogoutClick}
-                    className="w-full text-left flex items-center gap-2 px-4 py-2 text-xs xl:text-sm font-semibold text-red-600 hover:bg-red-50 transition rounded-xl"
+                    className="w-full text-left flex items-center gap-2 px-4 py-2 text-xs xl:text-sm font-semibold text-red-600 hover:bg-red-50 transition"
                   >
                     <LogOut className="w-4 h-4" />
                     Log Out
@@ -124,7 +150,7 @@ export default function Header({
       </header>
 
       {/* Mobile Header */}
-      <header className="relative flex md:hidden justify-between items-center px-5 h-16 w-full z-40 bg-white/80 sticky top-0 border-b border-gray-100 backdrop-blur-xl shadow-sm">
+      <header className="relative flex md:hidden justify-between items-center px-5 h-16 w-full z-40 bg-white/90 sticky top-0 border-b border-gray-100 backdrop-blur-xl shadow-sm">
         <Link
           to="/"
           className="w-10 h-10 flex items-center justify-center rounded-full bg-[#426306]"
@@ -183,11 +209,15 @@ export default function Header({
               <div className="space-y-1">
                 <button
                   type="button"
-                  onClick={handleUserClick}
+                  onClick={handleDashboardClick}
                   className="w-full text-left px-4 py-2 rounded-xl text-sm font-bold text-[#426306] bg-[#e8f2d8] flex items-center gap-2"
                 >
-                  <User className="w-4 h-4" />
-                  Dashboard ({userName})
+                  {userRole === 'admin' ? (
+                    <Shield className="w-4 h-4 text-amber-700" />
+                  ) : (
+                    <User className="w-4 h-4" />
+                  )}
+                  {userRole === 'admin' ? 'Admin Dashboard' : `Dashboard (${userName})`}
                 </button>
                 <button
                   type="button"

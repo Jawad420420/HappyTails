@@ -15,6 +15,7 @@ app.use(
   })
 );
 app.use(express.json());
+
 app.use("/api/auth", authRoutes);
 app.use("/api/pets", petRoutes);
 app.use("/api/adoptions", adoptionRoutes);
@@ -23,7 +24,7 @@ app.use("/api/vaccinations", vaccinationRoutes);
 const connectDB = async () => {
   try {
     await mongoose.connect(process.env.MONGODB_URI);
-    console.log("Connected to database");
+    console.log("Connected to MongoDB Atlas database");
   } catch (err) {
     console.log(`Error connecting to database ${err}`);
     process.exit(1);
@@ -33,10 +34,10 @@ const connectDB = async () => {
 connectDB();
 
 app.get("/", (req, res) => {
-  res.send("API is running");
+  res.send("HappyTails API is running");
 });
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });

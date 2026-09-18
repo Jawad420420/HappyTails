@@ -1,74 +1,82 @@
-import { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Routes, Route, useNavigate, Navigate } from 'react-router-dom';
-import { initialPetsData, initialApplications } from './data/petsData';
 import { saveSession, clearSession, getStoredUser } from './lib/auth';
+import { getPets } from './lib/api';
 
-// Components import
+// Components
 import Header from './components/Header';
 import AuthFlow from './components/AuthFlow';
 import ProtectedRoute from './components/ProtectedRoute';
 
-// Active Pages import
+// Pages
 import Home from './pages/Home';
 import FindPet from './pages/FindPet';
 import PetDetails from './pages/PetDetails';
 import AdoptionApply from './pages/AdoptionApply';
-import MyApplications from './pages/MyApplications';
 import AddPet from './pages/AddPet';
 import Volunteer from './pages/Volunteer';
 import Vaccination from './pages/Vaccination';
 import UserDashboard from './pages/UserDashboard';
-import Shelters from './pages/Shelters';
+import AdminDashboard from './pages/AdminDashboard';
 import PetCareGuide from './pages/PetCareGuide';
 import SuccessStories from './pages/SuccessStories';
-import ShelterDashboard from './pages/ShelterDashboard';
 
 export default function App() {
   const navigate = useNavigate();
-  const [pets, setPets] = useState(initialPetsData);
-  const [selectedPet, setSelectedPet] = useState(initialPetsData[0]);
-  const [applications, setApplications] = useState(initialApplications);
+  const [pets, setPets] = useState([]);
+  const [loadingPets, setLoadingPets] = useState(true);
 
-  // Auth States (restored from localStorage on load, so refreshes keep the session)
+  // Auth States restored from localStorage
   const storedUser = getStoredUser();
   const [isLoggedIn, setIsLoggedIn] = useState(!!storedUser);
-  const [userRole, setUserRole] = useState(storedUser?.role || null); // 'adopter' or 'shelter'
+  const [userRole, setUserRole] = useState(storedUser?.role || null); // 'user' | 'admin'
   const [userName, setUserName] = useState(storedUser?.name || '');
 
+  const loadPets = async () => {
+    try {
+      setLoadingPets(true);
+      const data = await getPets();
+      setPets(data);
+    } catch {
+      // Ignore network failure on initial load
+    } finally {
+      setLoadingPets(false);
+    }
+  };
+
+  useEffect(() => {
+    loadPets();
+  }, []);
+
   const handleSelectPet = (pet) => {
-    setSelectedPet(pet);
-    navigate('/pet-details');
+    const id = pet._id || pet.id;
+    navigate(`/pet/${id}`);
   };
 
   const handleApplyPet = (pet) => {
-    setSelectedPet(pet);
-    navigate('/apply');
+    const id = pet._id || pet.id;
+    navigate(`/apply/${id}`);
   };
 
-  // Favorite toggle handler
-  function handleToggleFavorite(petId) {
-    setPets((prevPets) =>
-      prevPets.map((pet) =>
-        pet.id === petId ? { ...pet, isFavorite: !pet.isFavorite } : pet
-      )
+  const handleToggleFavorite = (petId) => {
+    setPets((prev) =>
+      prev.map((p) => {
+        const id = p._id || p.id;
+        return id === petId ? { ...p, isFavorite: !p.isFavorite } : p;
+      })
     );
-  }
-
-  const handleSubmitApplication = (newApp) => {
-    setApplications((prev) => [newApp, ...prev]);
   };
 
-  // Auth Handler Functions
   const handleLogin = (user, token) => {
     saveSession(token, user);
     setIsLoggedIn(true);
     setUserRole(user.role);
     setUserName(user.name);
-    // Auto-redirect to proper dashboard after login
-    if (user.role === 'adopter') {
-      navigate('/user-dashboard');
+
+    if (user.role === 'admin') {
+      navigate('/admin-dashboard');
     } else {
-      navigate('/shelter-dashboard');
+      navigate('/user-dashboard');
     }
   };
 
@@ -89,6 +97,7 @@ export default function App() {
         onOpenAuth={() => navigate('/auth')}
         onLogout={handleLogout}
       />
+
       <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 sm:pt-6">
         <Routes>
           {/* Main Pages */}
@@ -114,65 +123,67 @@ export default function App() {
             }
           />
           <Route
-            path="/pet-details"
+            path="/pet/:id"
             element={
               <PetDetails
-                pet={selectedPet}
+                isLoggedIn={isLoggedIn}
                 onApply={handleApplyPet}
                 onToggleFavorite={handleToggleFavorite}
               />
             }
           />
           <Route
-            path="/apply"
+            path="/apply/:id"
             element={
-              <AdoptionApply
-                selectedPet={selectedPet}
-                onSubmitApplication={handleSubmitApplication}
-              />
-            }
-          />
-          <Route
-            path="/applications"
-            element={
-              <ProtectedRoute isLoggedIn={isLoggedIn} userRole={userRole} allowedRole="adopter">
-                <MyApplications applications={applications} />
+              <ProtectedRoute isLoggedIn={isLoggedIn} userRole={userRole}>
+                <AdoptionApply />
               </ProtectedRoute>
             }
           />
 
-          {/* Form & Info Pages */}
+          {/* Form & Resource Pages */}
+          <Route path="/volunteer" element={<Volunteer />} />
+          <Route path="/vaccination" element={<Vaccination />} />
+          <Route path="/pet-care" element={<PetCareGuide />} />
+          <Route path="/stories" element={<SuccessStories />} />
+
+          {/* Admin Routes */}
+          <Route
+            path="/admin-dashboard"
+            element={
+              <ProtectedRoute
+                isLoggedIn={isLoggedIn}
+                userRole={userRole}
+                allowedRole="admin"
+              >
+                <AdminDashboard />
+              </ProtectedRoute>
+            }
+          />
           <Route
             path="/add-pet"
             element={
-              <ProtectedRoute isLoggedIn={isLoggedIn} userRole={userRole} allowedRole="shelter">
+              <ProtectedRoute
+                isLoggedIn={isLoggedIn}
+                userRole={userRole}
+                allowedRole="admin"
+              >
                 <AddPet />
               </ProtectedRoute>
             }
           />
-          <Route path="/volunteer" element={<Volunteer />} />
-          <Route path="/vaccination" element={<Vaccination />} />
-          <Route path="/shelters" element={<Shelters />} />
-          <Route path="/pet-care" element={<PetCareGuide />} />
-          <Route path="/stories" element={<SuccessStories />} />
 
-          {/* Dashboards & Auth */}
+          {/* User Dashboard */}
           <Route
             path="/user-dashboard"
             element={
-              <ProtectedRoute isLoggedIn={isLoggedIn} userRole={userRole} allowedRole="adopter">
-                <UserDashboard applications={applications} userName={userName} />
+              <ProtectedRoute isLoggedIn={isLoggedIn} userRole={userRole}>
+                <UserDashboard userName={userName} />
               </ProtectedRoute>
             }
           />
-          <Route
-            path="/shelter-dashboard"
-            element={
-              <ProtectedRoute isLoggedIn={isLoggedIn} userRole={userRole} allowedRole="shelter">
-                <ShelterDashboard userName={userName} />
-              </ProtectedRoute>
-            }
-          />
+
+          {/* Authentication */}
           <Route
             path="/auth"
             element={
