@@ -31,3 +31,12 @@ export const login = ({ email, password }) =>
     method: 'POST',
     body: JSON.stringify({ email, password }),
   });
+
+// Adoptions
+export const submitAdoption = (data) =>
+  request('/adoptions', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+
+export const getMyAdoptions = () => request('/adoptions/my');
