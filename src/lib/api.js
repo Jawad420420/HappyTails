@@ -32,6 +32,29 @@ export const login = ({ email, password }) =>
     body: JSON.stringify({ email, password }),
   });
 
+// Pets
+export const getPets = (params = {}) => {
+  const query = new URLSearchParams();
+  if (params.type && params.type !== 'all') query.append('type', params.type);
+  if (params.status) query.append('status', params.status);
+  if (params.search) query.append('search', params.search);
+  const qStr = query.toString();
+  return request(`/pets${qStr ? `?${qStr}` : ''}`);
+};
+
+export const getPetById = (id) => request(`/pets/${id}`);
+
+export const createPet = (data) =>
+  request('/pets', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+
+export const deletePet = (id) =>
+  request(`/pets/${id}`, {
+    method: 'DELETE',
+  });
+
 // Adoptions
 export const submitAdoption = (data) =>
   request('/adoptions', {

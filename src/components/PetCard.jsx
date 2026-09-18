@@ -1,7 +1,9 @@
-// pet card component jeta list e render hoi
-import { Heart, MapPin, CheckCircle2, AlertCircle, X } from 'lucide-react';
+import React from 'react';
+import { Heart, MapPin, CheckCircle2 } from 'lucide-react';
 
-export default function PetCard({ pet, onSelectPet, onToggleFavorite, isShelterAdmin = false }) {
+export default function PetCard({ pet, onSelectPet, onToggleFavorite }) {
+  const petId = pet._id || pet.id;
+
   return (
     <article
       onClick={() => onSelectPet(pet)}
@@ -14,41 +16,43 @@ export default function PetCard({ pet, onSelectPet, onToggleFavorite, isShelterA
           alt={pet.name}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
           loading="lazy"
+          onError={(e) => {
+            e.target.src =
+              'https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=crop&w=900&q=80';
+          }}
         />
 
-        {/* Shelter Admin White Cross OR Regular User Favorite Heart */}
-        {isShelterAdmin ? (
-          <button
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation(); // card click thik thakar jonno
-            }}
-            className="absolute top-3 right-3 p-2 rounded-full bg-[#ba1a1a] text-white shadow-md hover:bg-[#93000a] transition-all duration-200 active:scale-90"
-            title="Remove pet listing"
-          >
-            <X className="w-5 h-5 text-white" />
-          </button>
-        ) : (
-          <button
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation(); // card click thik thakar jonno
-              onToggleFavorite(pet.id);
-            }}
-            className={`absolute top-3 right-3 p-2 rounded-full backdrop-blur-md transition-all duration-200 active:scale-90 ${
-              pet.isFavorite
-                ? 'bg-[#ffffff] text-[#ba1a1a] shadow-md'
-                : 'bg-[#ffffff]/80 text-[#44493a] hover:bg-[#ffffff] hover:text-[#ba1a1a]'
+        <div className="absolute top-3 left-3">
+          <span
+            className={`px-2.5 py-1 text-[10px] font-bold rounded-full uppercase tracking-wider shadow-sm ${
+              pet.status === 'adopted'
+                ? 'bg-purple-600 text-white'
+                : 'bg-[#426306] text-white'
             }`}
-            title={pet.isFavorite ? 'Remove favorite' : 'Add to favorite'}
           >
-            <Heart
-              className="w-5 h-5"
-              fill={pet.isFavorite ? '#ba1a1a' : 'none'}
-              strokeWidth={pet.isFavorite ? 2.5 : 2}
-            />
-          </button>
-        )}
+            {pet.status === 'adopted' ? 'Adopted' : 'Available'}
+          </span>
+        </div>
+
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            if (onToggleFavorite) onToggleFavorite(petId);
+          }}
+          className={`absolute top-3 right-3 p-2 rounded-full backdrop-blur-md transition-all duration-200 active:scale-90 ${
+            pet.isFavorite
+              ? 'bg-[#ffffff] text-[#ba1a1a] shadow-md'
+              : 'bg-[#ffffff]/80 text-[#44493a] hover:bg-[#ffffff] hover:text-[#ba1a1a]'
+          }`}
+          title={pet.isFavorite ? 'Remove favorite' : 'Add to favorite'}
+        >
+          <Heart
+            className="w-4 h-4"
+            fill={pet.isFavorite ? '#ba1a1a' : 'none'}
+            strokeWidth={pet.isFavorite ? 2.5 : 2}
+          />
+        </button>
       </div>
 
       {/* pet details info */}
@@ -56,29 +60,28 @@ export default function PetCard({ pet, onSelectPet, onToggleFavorite, isShelterA
         <div>
           {/* name and gender */}
           <div className="flex justify-between items-center mb-1">
-            <h3 className="text-xl font-bold text-[#161d1f] group-hover:text-[#426306] transition-colors">
+            <h3 className="text-lg font-bold text-[#161d1f] group-hover:text-[#426306] transition-colors">
               {pet.name}
             </h3>
 
             <span
-              className={`text-sm font-semibold px-2 py-0.5 rounded-full ${
+              className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
                 pet.gender === 'male'
                   ? 'text-[#426306] bg-[#5a7d22]/15'
                   : 'text-[#944a00] bg-[#fc8f34]/15'
               }`}
-              title={pet.gender === 'male' ? 'Male' : 'Female'}
             >
               {pet.gender === 'male' ? '♂ Male' : '♀ Female'}
             </span>
           </div>
 
           {/* species and age */}
-          <p className="text-sm font-medium text-[#44493a] mb-1 capitalize">
-            {pet.type} • {pet.age}
+          <p className="text-xs font-medium text-[#44493a] mb-1 capitalize">
+            {pet.breed} • {pet.age}
           </p>
 
           {/* location */}
-          <p className="text-xs text-[#44493a] flex items-center gap-1 mb-3">
+          <p className="text-xs text-[#44493a] flex items-center gap-1 mb-2">
             <MapPin className="w-3.5 h-3.5 text-[#747969]" />
             <span>{pet.location}</span>
           </p>
@@ -87,14 +90,13 @@ export default function PetCard({ pet, onSelectPet, onToggleFavorite, isShelterA
         {/* vaccination status badge */}
         <div className="pt-3 border-t border-[#dde4e6]/50 flex items-center justify-between">
           {pet.isVaccinated ? (
-            <div className="inline-flex items-center gap-1.5 bg-[#c7f087]/50 text-[#121f00] px-3 py-1 rounded-full text-xs font-semibold">
+            <div className="inline-flex items-center gap-1.5 bg-[#c7f087]/50 text-[#121f00] px-2.5 py-0.5 rounded-full text-[11px] font-semibold">
               <CheckCircle2 className="w-3.5 h-3.5 text-[#426306]" />
               <span>Vaccinated</span>
             </div>
           ) : (
-            <div className="inline-flex items-center gap-1.5 bg-[#ffdad6] text-[#93000a] px-3 py-1 rounded-full text-xs font-semibold">
-              <AlertCircle className="w-3.5 h-3.5 text-[#ba1a1a]" />
-              <span>Not Vaccinated</span>
+            <div className="inline-flex items-center gap-1 bg-gray-100 text-gray-500 px-2.5 py-0.5 rounded-full text-[11px] font-semibold">
+              <span>Health Checked</span>
             </div>
           )}
 
