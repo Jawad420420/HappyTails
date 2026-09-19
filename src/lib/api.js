@@ -1,4 +1,5 @@
 import { getToken } from './auth';
+export { getToken };
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000/api';
 
@@ -84,6 +85,23 @@ export const updateAdoptionStatus = (id, status) =>
     body: JSON.stringify({ status }),
   });
 
+// Volunteer Applications
+export const submitVolunteer = (data) =>
+  request('/volunteers', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+
+export const getMyVolunteers = () => request('/volunteers/my');
+
+export const getAllVolunteers = () => request('/volunteers');
+
+export const updateVolunteerStatus = (id, status) =>
+  request(`/volunteers/${id}/status`, {
+    method: 'PATCH',
+    body: JSON.stringify({ status }),
+  });
+    
 // Vaccinations
 export const addVaccination = (data) =>
   request('/vaccinations', {

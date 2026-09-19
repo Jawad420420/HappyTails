@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Heart, PawPrint, CheckCircle2, AlertCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { getStoredUser } from '../../lib/auth';
+import { getStoredUser, getToken } from '../../lib/auth';
 
 export default function VolunteerForm() {
   const storedUser = getStoredUser();
@@ -11,8 +11,8 @@ export default function VolunteerForm() {
     email: storedUser?.email || '',
     phone: '',
     location: '',
-    workType: 'Pet Care',
-    availability: 'Weekends',
+    workType: 'Pet Care & Feeding',
+    availability: 'Weekends Only',
     message: '',
   });
 
@@ -23,15 +23,51 @@ export default function VolunteerForm() {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setStatus('loading');
     setErrorMsg('');
 
-    // Mock client-side submission
-    setTimeout(() => {
+    // Retrieve authentication token
+    const token = getToken ? getToken() : localStorage.getItem('token');
+
+    if (!token) {
+      setStatus('error');
+      setErrorMsg('You must be logged in to submit a volunteer application. Please log in first.');
+      return;
+    }
+
+    try {
+      // Real API Call with Authorization Bearer token attached
+      const response = await fetch('http://localhost:4000/api/volunteers', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`, // Pass JWT token to satisfy auth middleware
+        },
+        body: JSON.stringify({
+          fullName: form.name,
+          email: form.email,
+          phone: form.phone,
+          city: form.location,
+          role: form.workType,
+          availability: form.availability,
+          reason: form.message,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || data.error || 'Failed to submit application');
+      }
+
+      // Show success screen
       setStatus('success');
-    }, 600);
+    } catch (err) {
+      setStatus('error');
+      setErrorMsg(err.message || 'Something went wrong. Please try again.');
+    }
   };
 
   const inputBox =
@@ -126,13 +162,14 @@ export default function VolunteerForm() {
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-gray-700 mb-1">City / Area</label>
+              <label className="block text-xs font-semibold text-gray-700 mb-1">City / Area *</label>
               <input
                 name="location"
                 placeholder="e.g. Dhanmondi, Dhaka"
                 className={inputBox}
                 value={form.location}
                 onChange={handleChange}
+                required
               />
             </div>
 
@@ -145,11 +182,11 @@ export default function VolunteerForm() {
                 onChange={handleChange}
                 required
               >
-                <option value="Pet Care">Pet Care & Feeding</option>
-                <option value="Dog Walking">Dog Walking & Exercise</option>
-                <option value="Fostering">Temporary Fostering</option>
-                <option value="Event Support">Adoption Events & Outreach</option>
-                <option value="Administrative">Administrative & Coordination</option>
+                <option value="Pet Care & Feeding">Pet Care & Feeding</option>
+                <option value="Dog Walking & Exercise">Dog Walking & Exercise</option>
+                <option value="Temporary Fostering">Temporary Fostering</option>
+                <option value="Adoption Events & Outreach">Adoption Events & Outreach</option>
+                <option value="Administrative & Coordination">Administrative & Coordination</option>
               </select>
             </div>
 
@@ -162,17 +199,17 @@ export default function VolunteerForm() {
                 onChange={handleChange}
                 required
               >
-                <option value="Weekends">Weekends Only</option>
+                <option value="Weekends Only">Weekends Only</option>
                 <option value="Weekdays">Weekdays</option>
                 <option value="Evenings">Evenings</option>
-                <option value="Flexible">Flexible / On-call</option>
+                <option value="Flexible / On-call">Flexible / On-call</option>
               </select>
             </div>
           </div>
 
           <div>
             <label className="block text-xs font-semibold text-gray-700 mb-1">
-              Why do you want to volunteer?
+              Why do you want to volunteer? *
             </label>
             <textarea
               name="message"
@@ -180,6 +217,7 @@ export default function VolunteerForm() {
               className={`${inputBox} h-28 resize-none`}
               value={form.message}
               onChange={handleChange}
+              required
             />
           </div>
 

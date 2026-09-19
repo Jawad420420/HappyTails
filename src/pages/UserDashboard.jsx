@@ -11,22 +11,11 @@ import {
   ArrowRight,
   User,
 } from 'lucide-react';
-import { getMyAdoptions, getMyVaccinations } from '../lib/api';
-
-const mockUserVolunteerRequests = [
-  {
-    _id: 'mock-vol-user-1',
-    workType: 'Pet Care & Feeding',
-    availability: 'Weekends Only',
-    createdAt: '2026-09-15T10:00:00.000Z',
-    message: 'Excited to spend weekends walking dogs and helping with feeding routines.',
-    status: 'approved',
-  },
-];
+import { getMyAdoptions, getMyVaccinations, getMyVolunteers } from '../lib/api';
 
 export default function UserDashboard({ userName }) {
   const [adoptions, setAdoptions] = useState([]);
-  const [volunteers] = useState(mockUserVolunteerRequests);
+  const [volunteers, setVolunteers] = useState([]);
   const [vaccinations, setVaccinations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -36,12 +25,14 @@ export default function UserDashboard({ userName }) {
     async function loadUserData() {
       try {
         setLoading(true);
-        const [adoptionsData, vaccData] = await Promise.all([
+        const [adoptionsData, vaccData, volData] = await Promise.all([
           getMyAdoptions(),
           getMyVaccinations().catch(() => []),
+          getMyVolunteers().catch(() => []),
         ]);
-        setAdoptions(adoptionsData);
-        setVaccinations(vaccData);
+        setAdoptions(adoptionsData || []);
+        setVaccinations(vaccData || []);
+        setVolunteers(volData || []);
       } catch (err) {
         setError(err.message || 'Failed to load dashboard data');
       } finally {
@@ -129,7 +120,7 @@ export default function UserDashboard({ userName }) {
               Volunteer Applications
             </p>
             <p className="text-2xl font-black text-gray-900 mt-0.5">
-              {volunteers.length}
+              {loading ? '...' : volunteers.length}
             </p>
           </div>
         </div>
@@ -197,7 +188,7 @@ export default function UserDashboard({ userName }) {
           {loading ? (
             <div className="text-center py-12">
               <div className="w-8 h-8 border-4 border-[#426306] border-t-transparent rounded-full animate-spin mx-auto mb-2" />
-              <p className="text-xs text-gray-500">Loading your applications...</p>
+              <p className="text-xs text-gray-500">Loading your records...</p>
             </div>
           ) : error ? (
             <div className="bg-red-50 text-red-700 p-4 rounded-xl text-xs font-medium">
@@ -285,51 +276,70 @@ export default function UserDashboard({ userName }) {
                 </div>
               )}
 
-              {/* VOLUNTEERS TAB (MOCK DATA) */}
+              {/* VOLUNTEERS TAB */}
               {activeTab === 'volunteers' && (
                 <div>
-                  <div className="space-y-4">
-                    {volunteers.map((vol) => (
-                      <div
-                        key={vol._id}
-                        className="bg-gray-50/70 rounded-2xl border border-gray-200/60 p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
+                  {volunteers.length === 0 ? (
+                    <div className="text-center py-12 bg-gray-50 rounded-2xl border border-gray-100">
+                      <HandHeart className="w-10 h-10 text-gray-300 mx-auto mb-3" />
+                      <h3 className="font-bold text-gray-900 mb-1 text-base">
+                        No Volunteer Applications Found
+                      </h3>
+                      <p className="text-gray-500 text-xs mb-4">
+                        Interested in giving back? Apply to become a volunteer today!
+                      </p>
+                      <Link
+                        to="/volunteer"
+                        className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#426306] text-white text-xs font-bold rounded-xl hover:bg-[#344e05] transition"
                       >
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <h3 className="font-bold text-gray-900 text-base">
-                              {vol.workType}
-                            </h3>
-                            <span className="text-xs font-medium text-gray-600 bg-gray-200/80 px-2 py-0.5 rounded-lg">
-                              {vol.availability}
+                        Apply as Volunteer
+                        <ArrowRight className="w-3.5 h-3.5" />
+                      </Link>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {volunteers.map((vol) => (
+                        <div
+                          key={vol._id}
+                          className="bg-gray-50/70 rounded-2xl border border-gray-200/60 p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
+                        >
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <h3 className="font-bold text-gray-900 text-base">
+                                {vol.role || vol.workType || 'General Volunteer'}
+                              </h3>
+                              <span className="text-xs font-medium text-gray-600 bg-gray-200/80 px-2 py-0.5 rounded-lg">
+                                {vol.availability}
+                              </span>
+                            </div>
+                            <p className="text-xs text-gray-500 mt-1 flex items-center gap-2">
+                              <Calendar className="w-3.5 h-3.5 text-gray-400" />
+                              Applied:{' '}
+                              {new Date(vol.createdAt).toLocaleDateString(undefined, {
+                                dateStyle: 'medium',
+                              })}
+                            </p>
+                            {(vol.reason || vol.message) && (
+                              <p className="text-xs text-gray-600 mt-2 bg-white p-2.5 rounded-xl border border-gray-200/60 max-w-xl italic">
+                                "{vol.reason || vol.message}"
+                              </p>
+                            )}
+                          </div>
+
+                          <div className="flex flex-col sm:items-end gap-1 shrink-0">
+                            {getStatusBadge(vol.status)}
+                            <span className="text-[11px] text-gray-400 mt-1">
+                              {vol.status === 'approved'
+                                ? 'Welcome to the volunteer team!'
+                                : vol.status === 'rejected'
+                                ? 'Application not approved at this time'
+                                : 'Awaiting coordinator review'}
                             </span>
                           </div>
-                          <p className="text-xs text-gray-500 mt-1 flex items-center gap-2">
-                            <Calendar className="w-3.5 h-3.5 text-gray-400" />
-                            Applied:{' '}
-                            {new Date(vol.createdAt).toLocaleDateString(undefined, {
-                              dateStyle: 'medium',
-                            })}
-                          </p>
-                          {vol.message && (
-                            <p className="text-xs text-gray-600 mt-2 bg-white p-2.5 rounded-xl border border-gray-200/60 max-w-xl italic">
-                              "{vol.message}"
-                            </p>
-                          )}
                         </div>
-
-                        <div className="flex flex-col sm:items-end gap-1 shrink-0">
-                          {getStatusBadge(vol.status)}
-                          <span className="text-[11px] text-gray-400 mt-1">
-                            {vol.status === 'approved'
-                              ? 'Welcome to the volunteer team!'
-                              : vol.status === 'rejected'
-                              ? 'Application not approved at this time'
-                              : 'Awaiting coordinator review'}
-                          </span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               )}
 

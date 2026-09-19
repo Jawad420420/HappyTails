@@ -6,6 +6,7 @@ import authRoutes from "./routes/authRoutes.js";
 import petRoutes from "./routes/petRoutes.js";
 import adoptionRoutes from "./routes/adoptionRoutes.js";
 import vaccinationRoutes from "./routes/vaccinationRoutes.js";
+import volunteerRoutes from "./routes/volunteerRoutes.js";
 
 const app = express();
 app.use(
@@ -16,10 +17,12 @@ app.use(
 );
 app.use(express.json());
 
+// Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/pets", petRoutes);
 app.use("/api/adoptions", adoptionRoutes);
 app.use("/api/vaccinations", vaccinationRoutes);
+app.use("/api/volunteers", volunteerRoutes); 
 
 const connectDB = async () => {
   try {
