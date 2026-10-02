@@ -121,3 +121,27 @@ export const deleteVaccination = (id) =>
   request(`/vaccinations/${id}`, {
     method: 'DELETE',
   });
+
+// Volunteer Tasks
+export const getAllTasks = () => request('/tasks');
+
+export const createTask = (data) =>
+  request('/tasks', { method: 'POST', body: JSON.stringify(data) });
+
+// → { isVolunteer: boolean, tasks: Task[] } (open tasks + tasks I'm interested in / assigned to)
+export const getMyTasks = () => request('/tasks/my');
+
+export const toggleTaskInterest = (id) => request(`/tasks/${id}/interest`, { method: 'POST' });
+
+export const assignTask = (id, userId) =>
+  request(`/tasks/${id}/assign`, { method: 'PATCH', body: JSON.stringify({ userId }) });
+
+// proofImage: base64 data URL (FileReader.readAsDataURL)
+export const submitTask = (id, { proofImage, note }) =>
+  request(`/tasks/${id}/submit`, { method: 'POST', body: JSON.stringify({ proofImage, note }) });
+
+// action: 'complete' | 'reject' (reject requires message; sends task back to Assigned)
+export const reviewTask = (id, action, message) =>
+  request(`/tasks/${id}/review`, { method: 'PATCH', body: JSON.stringify({ action, message }) });
+
+export const closeTask = (id) => request(`/tasks/${id}/close`, { method: 'PATCH' });

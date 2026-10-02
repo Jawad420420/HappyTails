@@ -9,6 +9,7 @@ import {
   PlusCircle,
   Trash2,
   Shield,
+  ClipboardList,
 } from 'lucide-react';
 import {
   getPets,
@@ -18,13 +19,16 @@ import {
   getAllUsers,
   getAllVolunteers,
   updateVolunteerStatus,
+  getAllTasks,
 } from '../lib/api';
+import TaskManager from '../components/admin/TaskManager';
 
 export default function AdminDashboard() {
   const [pets, setPets] = useState([]);
   const [adoptions, setAdoptions] = useState([]);
   const [volunteers, setVolunteers] = useState([]);
   const [users, setUsers] = useState([]);
+  const [tasks, setTasks] = useState([]);
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -38,17 +42,19 @@ export default function AdminDashboard() {
       setLoading(true);
       setError('');
 
-      const [petsData, adoptionsData, usersData, volunteersData] = await Promise.all([
+      const [petsData, adoptionsData, usersData, volunteersData, tasksData] = await Promise.all([
         getPets(),
         getAllAdoptions(),
         getAllUsers(),
         getAllVolunteers(),
+        getAllTasks(),
       ]);
 
       setPets(petsData || []);
       setAdoptions(adoptionsData || []);
       setUsers(usersData || []);
       setVolunteers(volunteersData || []);
+      setTasks(tasksData || []);
     } catch (err) {
       setError(err.message || 'Failed to load admin data');
     } finally {
@@ -251,6 +257,19 @@ export default function AdminDashboard() {
             <Users className="w-4 h-4" />
             Registered Users ({users.length})
           </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveTab('tasks')}
+            className={`pb-3 px-4 text-xs sm:text-sm font-bold border-b-2 whitespace-nowrap transition flex items-center gap-2 ${
+              activeTab === 'tasks'
+                ? 'border-[#426306] text-[#426306]'
+                : 'border-transparent text-gray-500 hover:text-gray-900'
+            }`}
+          >
+            <ClipboardList className="w-4 h-4" />
+            Volunteer Tasks ({tasks.length})
+          </button>
         </div>
 
         {/* Tab Content */}
@@ -401,6 +420,11 @@ export default function AdminDashboard() {
                     </div>
                   ))}
                 </div>
+              )}
+
+              {/* TASKS TAB */}
+              {activeTab === 'tasks' && (
+                <TaskManager tasks={tasks} setTasks={setTasks} flashMessage={flashMessage} />
               )}
             </>
           )}
