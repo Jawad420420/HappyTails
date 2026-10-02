@@ -10,13 +10,16 @@ import {
   XCircle,
   ArrowRight,
   User,
+  ClipboardList,
 } from 'lucide-react';
-import { getMyAdoptions, getMyVaccinations, getMyVolunteers } from '../lib/api';
+import { getMyAdoptions, getMyVaccinations, getMyVolunteers, getMyTasks } from '../lib/api';
+import VolunteerTasks from '../components/volunteer/VolunteerTasks';
 
 export default function UserDashboard({ userName }) {
   const [adoptions, setAdoptions] = useState([]);
   const [volunteers, setVolunteers] = useState([]);
   const [vaccinations, setVaccinations] = useState([]);
+  const [taskData, setTaskData] = useState({ isVolunteer: false, tasks: [] });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [activeTab, setActiveTab] = useState('adoptions');
@@ -25,14 +28,16 @@ export default function UserDashboard({ userName }) {
     async function loadUserData() {
       try {
         setLoading(true);
-        const [adoptionsData, vaccData, volData] = await Promise.all([
+        const [adoptionsData, vaccData, volData, tasksData] = await Promise.all([
           getMyAdoptions(),
           getMyVaccinations().catch(() => []),
           getMyVolunteers().catch(() => []),
+          getMyTasks().catch(() => null),
         ]);
         setAdoptions(adoptionsData || []);
         setVaccinations(vaccData || []);
         setVolunteers(volData || []);
+        if (tasksData) setTaskData({ isVolunteer: !!tasksData.isVolunteer, tasks: tasksData.tasks || [] });
       } catch (err) {
         setError(err.message || 'Failed to load dashboard data');
       } finally {
@@ -180,6 +185,19 @@ export default function UserDashboard({ userName }) {
           >
             <ShieldCheck className="w-4 h-4" />
             Vaccination Reminders ({vaccinations.length})
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveTab('tasks')}
+            className={`pb-3 px-4 text-xs sm:text-sm font-bold border-b-2 whitespace-nowrap transition flex items-center gap-2 ${
+              activeTab === 'tasks'
+                ? 'border-[#426306] text-[#426306]'
+                : 'border-transparent text-gray-500 hover:text-gray-900'
+            }`}
+          >
+            <ClipboardList className="w-4 h-4" />
+            Volunteer Tasks ({taskData.tasks.length})
           </button>
         </div>
 
@@ -405,6 +423,20 @@ export default function UserDashboard({ userName }) {
                     </div>
                   )}
                 </div>
+              )}
+
+              {/* VOLUNTEER TASKS TAB */}
+              {activeTab === 'tasks' && (
+                <VolunteerTasks
+                  isVolunteer={taskData.isVolunteer}
+                  tasks={taskData.tasks}
+                  onTaskUpdate={(updated) =>
+                    setTaskData((d) => ({
+                      ...d,
+                      tasks: d.tasks.map((t) => (t._id === updated._id ? updated : t)),
+                    }))
+                  }
+                />
               )}
             </>
           )}
