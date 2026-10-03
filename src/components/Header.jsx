@@ -94,12 +94,7 @@ export default function Header({
                 {userRole === 'admin' ? (
                   <>
                     <Shield className="w-4 h-4 text-amber-700" />
-                    <span className="flex items-center gap-1.5">
-                      {userName || 'Admin'}
-                      <span className="bg-amber-100 text-amber-800 text-[10px] px-1.5 py-0.5 rounded font-bold uppercase">
-                        Admin
-                      </span>
-                    </span>
+                    <span>{userName || 'Admin'}</span>
                   </>
                 ) : (
                   <>

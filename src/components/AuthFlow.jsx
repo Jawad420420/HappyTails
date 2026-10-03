@@ -8,17 +8,115 @@ export default function AuthFlow({ onLogin, onCancel }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
+  const [fieldErrors, setFieldErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
+
+  // Strict Name Validation: Allows letters, spaces, dots, hyphens (no numbers)
+  const validateName = (val) => {
+    const trimmed = val.trim();
+    if (trimmed.length < 2) return false;
+    const nameRegex = /^[A-Za-z\s.-]+$/;
+    return nameRegex.test(trimmed);
+  };
+
+  // Dynamic Email Validation & Typo Detection
+  const validateEmail = (val) => {
+    const trimmed = val.trim().toLowerCase();
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(trimmed)) {
+      return { valid: false, reason: 'Please enter a valid email address' };
+    }
+
+    const domain = trimmed.split('@')[1];
+    const validDomains = [
+      'gmail.com',
+      'yahoo.com',
+      'hotmail.com',
+      'outlook.com',
+      'icloud.com',
+      'live.com',
+    ];
+
+    const getDistance = (a, b) => {
+      const matrix = Array.from({ length: a.length + 1 }, (_, i) => [i]);
+      for (let j = 0; j <= b.length; j++) matrix[0][j] = j;
+
+      for (let i = 1; i <= a.length; i++) {
+        for (let j = 1; j <= b.length; j++) {
+          const cost = a[i - 1] === b[j - 1] ? 0 : 1;
+          matrix[i][j] = Math.min(
+            matrix[i - 1][j] + 1,
+            matrix[i][j - 1] + 1,
+            matrix[i - 1][j - 1] + cost
+          );
+        }
+      }
+      return matrix[a.length][b.length];
+    };
+
+    for (const knownDomain of validDomains) {
+      if (domain !== knownDomain) {
+        const distance = getDistance(domain, knownDomain);
+        if (distance <= 2) {
+          return {
+            valid: false,
+            reason: 'Please enter a valid email address',
+          };
+        }
+      }
+    }
+
+    return { valid: true };
+  };
 
   const switchMode = (mode) => {
     setAuthMode(mode);
     setError('');
+    setFieldErrors({});
+  };
+
+  const handleNameChange = (e) => {
+    const val = e.target.value;
+    setName(val);
+    if (authMode === 'signup') {
+      setFieldErrors((prev) => ({
+        ...prev,
+        name: val && !validateName(val) ? 'Name should only contain letters and spaces (no numbers)' : '',
+      }));
+    }
+  };
+
+  const handleEmailChange = (e) => {
+    const val = e.target.value;
+    setEmail(val);
+    const emailResult = validateEmail(val);
+    setFieldErrors((prev) => ({
+      ...prev,
+      email: val && !emailResult.valid ? emailResult.reason : '',
+    }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+
+    // Check custom field validations before submission
+    const newErrors = {};
+    const emailCheck = validateEmail(email);
+    if (!emailCheck.valid) {
+      newErrors.email = emailCheck.reason;
+    }
+
+    if (authMode === 'signup' && !validateName(name)) {
+      newErrors.name = 'Name should only contain letters and spaces (no numbers)';
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setFieldErrors(newErrors);
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
@@ -39,7 +137,13 @@ export default function AuthFlow({ onLogin, onCancel }) {
     setEmail(demoEmail);
     setPassword(demoPass);
     setError('');
+    setFieldErrors({});
   };
+
+  const getInputStyle = (fieldName) =>
+    `w-full px-3 py-2 border ${
+      fieldErrors[fieldName] ? 'border-red-500 focus:ring-red-400' : 'border-gray-200 focus:ring-[#426306]/40'
+    } rounded-lg focus:outline-none focus:ring-2 focus:border-[#426306] text-sm`;
 
   return (
     <div className="min-h-[80vh] flex flex-col justify-center items-center p-4">
@@ -105,18 +209,21 @@ export default function AuthFlow({ onLogin, onCancel }) {
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4" noValidate>
           {authMode === 'signup' && (
             <div>
               <label className="block text-xs text-gray-600 mb-1 font-medium">Full Name</label>
               <input
                 type="text"
                 value={name}
-                onChange={(e) => setName(e.target.value)}
+                onChange={handleNameChange}
                 placeholder="Sarah Johnson"
                 required
-                className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#426306]/40 focus:border-[#426306] text-sm"
+                className={getInputStyle('name')}
               />
+              {fieldErrors.name && (
+                <p className="text-xs text-red-500 mt-1 font-medium">{fieldErrors.name}</p>
+              )}
             </div>
           )}
 
@@ -125,11 +232,14 @@ export default function AuthFlow({ onLogin, onCancel }) {
             <input
               type="email"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={handleEmailChange}
               placeholder="name@example.com"
               required
-              className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#426306]/40 focus:border-[#426306] text-sm"
+              className={getInputStyle('email')}
             />
+            {fieldErrors.email && (
+              <p className="text-xs text-red-500 mt-1 font-medium">{fieldErrors.email}</p>
+            )}
           </div>
 
           <div>

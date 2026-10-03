@@ -12,6 +12,7 @@ import {
   carbonTracker,
   carbonStats,
 } from "./middleware/carbonTracker.js";
+import guideRoutes from "./routes/guideRoutes.js";
 
 const app = express();
 app.use(
@@ -30,6 +31,7 @@ app.use("/api/adoptions", adoptionRoutes);
 app.use("/api/vaccinations", vaccinationRoutes);
 app.use("/api/volunteers", volunteerRoutes); 
 app.use("/api/tasks", taskRoutes);
+app.use("/api/guides", guideRoutes);
 
 const connectDB = async () => {
   try {

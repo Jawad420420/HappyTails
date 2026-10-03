@@ -20,6 +20,9 @@ import UserDashboard from './pages/UserDashboard';
 import AdminDashboard from './pages/AdminDashboard';
 import PetCareGuide from './pages/PetCareGuide';
 import SuccessStories from './pages/SuccessStories';
+import PrivacyPolicy from './pages/PrivacyPolicy';
+import TermsOfService from './pages/TermsOfService';
+import HelpCenter from './pages/HelpCenter';
 
 export default function App() {
   const navigate = useNavigate();
@@ -144,8 +147,13 @@ export default function App() {
           {/* Form & Resource Pages */}
           <Route path="/volunteer" element={<Volunteer />} />
           <Route path="/vaccination" element={<Vaccination />} />
-          <Route path="/pet-care" element={<PetCareGuide />} />
+          <Route path="/pet-care" element={<PetCareGuide userRole={userRole} />} />
           <Route path="/stories" element={<SuccessStories />} />
+
+          {/* Footer Legal Pages */}
+          <Route path="/privacy" element={<PrivacyPolicy />} />
+          <Route path="/terms" element={<TermsOfService />} />
+          <Route path="/help" element={<HelpCenter />} />
 
           {/* Admin Routes */}
           <Route

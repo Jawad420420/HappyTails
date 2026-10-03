@@ -16,11 +16,99 @@ export default function VolunteerForm() {
     message: '',
   });
 
+  const [fieldErrors, setFieldErrors] = useState({});
   const [status, setStatus] = useState('idle'); // idle | loading | success | error
   const [errorMsg, setErrorMsg] = useState('');
 
+  // Strict Name Validation: Allows letters, spaces, dots, hyphens (no numbers)
+  const validateName = (name) => {
+    const trimmed = name.trim();
+    if (trimmed.length < 2) return false;
+    const nameRegex = /^[A-Za-z\s.-]+$/;
+    return nameRegex.test(trimmed);
+  };
+
+  // Dynamic Email Validation & Typo Detection
+  const validateEmail = (val) => {
+    const trimmed = val.trim().toLowerCase();
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(trimmed)) {
+      return { valid: false, reason: 'Please enter a valid email address' };
+    }
+
+    const domain = trimmed.split('@')[1];
+    const validDomains = [
+      'gmail.com',
+      'yahoo.com',
+      'hotmail.com',
+      'outlook.com',
+      'icloud.com',
+      'live.com',
+    ];
+
+    const getDistance = (a, b) => {
+      const matrix = Array.from({ length: a.length + 1 }, (_, i) => [i]);
+      for (let j = 0; j <= b.length; j++) matrix[0][j] = j;
+
+      for (let i = 1; i <= a.length; i++) {
+        for (let j = 1; j <= b.length; j++) {
+          const cost = a[i - 1] === b[j - 1] ? 0 : 1;
+          matrix[i][j] = Math.min(
+            matrix[i - 1][j] + 1,
+            matrix[i][j - 1] + 1,
+            matrix[i - 1][j - 1] + cost
+          );
+        }
+      }
+      return matrix[a.length][b.length];
+    };
+
+    for (const knownDomain of validDomains) {
+      if (domain !== knownDomain) {
+        const distance = getDistance(domain, knownDomain);
+        if (distance <= 2) {
+          return {
+            valid: false,
+            reason: 'Please enter a valid email address',
+          };
+        }
+      }
+    }
+
+    return { valid: true };
+  };
+
+  // Strict Phone Validation
+  const validatePhone = (phone) => {
+    const phoneRegex = /^\+?[0-9\s-]{10,15}$/;
+    return phoneRegex.test(phone.trim());
+  };
+
   const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setForm((prev) => ({ ...prev, [name]: value }));
+
+    if (name === 'name') {
+      setFieldErrors((prev) => ({
+        ...prev,
+        name: value && !validateName(value) ? 'Name should only contain letters and spaces (no numbers)' : '',
+      }));
+    }
+
+    if (name === 'email') {
+      const emailResult = validateEmail(value);
+      setFieldErrors((prev) => ({
+        ...prev,
+        email: value && !emailResult.valid ? emailResult.reason : '',
+      }));
+    }
+
+    if (name === 'phone') {
+      setFieldErrors((prev) => ({
+        ...prev,
+        phone: value && !validatePhone(value) ? 'Please enter a valid phone number (10–15 digits)' : '',
+      }));
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -28,7 +116,26 @@ export default function VolunteerForm() {
     setStatus('loading');
     setErrorMsg('');
 
-    // Retrieve authentication token
+    const newErrors = {};
+    if (!validateName(form.name)) {
+      newErrors.name = 'Name should only contain letters and spaces (no numbers)';
+    }
+
+    const emailCheck = validateEmail(form.email);
+    if (!emailCheck.valid) {
+      newErrors.email = emailCheck.reason;
+    }
+
+    if (!validatePhone(form.phone)) {
+      newErrors.phone = 'Please enter a valid phone number (10–15 digits)';
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setFieldErrors(newErrors);
+      setStatus('idle');
+      return;
+    }
+
     const token = getToken ? getToken() : localStorage.getItem('token');
 
     if (!token) {
@@ -38,12 +145,11 @@ export default function VolunteerForm() {
     }
 
     try {
-      // Real API Call with Authorization Bearer token attached
       const response = await fetch('http://localhost:4000/api/volunteers', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`, // Pass JWT token to satisfy auth middleware
+          'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify({
           fullName: form.name,
@@ -62,7 +168,6 @@ export default function VolunteerForm() {
         throw new Error(data.message || data.error || 'Failed to submit application');
       }
 
-      // Show success screen
       setStatus('success');
     } catch (err) {
       setStatus('error');
@@ -70,12 +175,13 @@ export default function VolunteerForm() {
     }
   };
 
-  const inputBox =
-    'w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:bg-white focus:ring-2 focus:ring-[#426306] transition text-sm';
+  const getInputStyle = (fieldName) =>
+    `w-full px-4 py-3 bg-gray-50 border ${
+      fieldErrors[fieldName] ? 'border-red-500 focus:ring-red-500' : 'border-gray-200 focus:ring-[#426306]'
+    } rounded-xl outline-none focus:bg-white focus:ring-2 transition text-sm`;
 
   return (
     <div className="bg-white rounded-3xl shadow-sm p-6 md:p-8 border border-gray-100">
-      {/* Header */}
       <div className="flex items-center gap-3 mb-4">
         <div className="w-10 h-10 bg-[#e8f2d8] rounded-2xl flex items-center justify-center text-[#426306]">
           <PawPrint className="w-5 h-5" />
@@ -90,7 +196,6 @@ export default function VolunteerForm() {
         </div>
       </div>
 
-      {/* Hero Banner Image */}
       <div className="mb-6 rounded-2xl overflow-hidden bg-gray-100 h-48 sm:h-56 relative">
         <img
           src="https://images.unsplash.com/photo-1548767797-d8c844163c4c?auto=format&fit=crop&w=1200&q=80"
@@ -122,18 +227,21 @@ export default function VolunteerForm() {
           </div>
         </div>
       ) : (
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4" noValidate>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-semibold text-gray-700 mb-1">Full Name *</label>
               <input
                 name="name"
                 placeholder="Full Name"
-                className={inputBox}
+                className={getInputStyle('name')}
                 value={form.name}
                 onChange={handleChange}
                 required
               />
+              {fieldErrors.name && (
+                <p className="text-xs text-red-500 mt-1 font-medium">{fieldErrors.name}</p>
+              )}
             </div>
 
             <div>
@@ -142,11 +250,14 @@ export default function VolunteerForm() {
                 name="email"
                 type="email"
                 placeholder="Email Address"
-                className={inputBox}
+                className={getInputStyle('email')}
                 value={form.email}
                 onChange={handleChange}
                 required
               />
+              {fieldErrors.email && (
+                <p className="text-xs text-red-500 mt-1 font-medium">{fieldErrors.email}</p>
+              )}
             </div>
 
             <div>
@@ -154,11 +265,14 @@ export default function VolunteerForm() {
               <input
                 name="phone"
                 placeholder="Phone Number"
-                className={inputBox}
+                className={getInputStyle('phone')}
                 value={form.phone}
                 onChange={handleChange}
                 required
               />
+              {fieldErrors.phone && (
+                <p className="text-xs text-red-500 mt-1 font-medium">{fieldErrors.phone}</p>
+              )}
             </div>
 
             <div>
@@ -166,7 +280,7 @@ export default function VolunteerForm() {
               <input
                 name="location"
                 placeholder="e.g. Dhanmondi, Dhaka"
-                className={inputBox}
+                className={getInputStyle('location')}
                 value={form.location}
                 onChange={handleChange}
                 required
@@ -177,7 +291,7 @@ export default function VolunteerForm() {
               <label className="block text-xs font-semibold text-gray-700 mb-1">Role / Work Type *</label>
               <select
                 name="workType"
-                className={inputBox}
+                className={getInputStyle('workType')}
                 value={form.workType}
                 onChange={handleChange}
                 required
@@ -194,7 +308,7 @@ export default function VolunteerForm() {
               <label className="block text-xs font-semibold text-gray-700 mb-1">Your Availability *</label>
               <select
                 name="availability"
-                className={inputBox}
+                className={getInputStyle('availability')}
                 value={form.availability}
                 onChange={handleChange}
                 required
@@ -214,7 +328,7 @@ export default function VolunteerForm() {
             <textarea
               name="message"
               placeholder="Tell us a little about your experience with animals and why you want to join..."
-              className={`${inputBox} h-28 resize-none`}
+              className={`${getInputStyle('message')} h-28 resize-none`}
               value={form.message}
               onChange={handleChange}
               required

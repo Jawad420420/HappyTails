@@ -5,6 +5,7 @@ import FeaturedPets from '../components/home/FeaturedPets';
 import VolunteerCard from '../components/home/VolunteerCard';
 import HealthCard from '../components/home/HealthCard';
 import { getPets } from '../lib/api';
+import Footer from '../components/Footer';
 
 export default function Home({ pets: propPets, onSelectPet, onToggleFavorite }) {
   const [pets, setPets] = useState(propPets || []);
@@ -32,6 +33,7 @@ export default function Home({ pets: propPets, onSelectPet, onToggleFavorite }) 
 
       <VolunteerCard />
       <HealthCard />
+      <Footer />
     </div>
   );
 }
