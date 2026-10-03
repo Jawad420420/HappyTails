@@ -8,6 +8,10 @@ import adoptionRoutes from "./routes/adoptionRoutes.js";
 import vaccinationRoutes from "./routes/vaccinationRoutes.js";
 import volunteerRoutes from "./routes/volunteerRoutes.js";
 import taskRoutes from "./routes/taskRoutes.js";
+import {
+  carbonTracker,
+  carbonStats,
+} from "./middleware/carbonTracker.js";
 
 const app = express();
 app.use(
@@ -17,6 +21,7 @@ app.use(
   })
 );
 app.use(express.json({ limit: "10mb" }));
+app.use(carbonTracker);
 
 // Routes
 app.use("/api/auth", authRoutes);
@@ -40,6 +45,15 @@ connectDB();
 
 app.get("/", (req, res) => {
   res.send("HappyTails API is running");
+});
+
+
+app.get("/api/carbon-stats", (req, res) => {
+  res.json({
+    totalRequests: carbonStats.requests,
+    totalBytes: carbonStats.totalBytes,
+    totalCO2Grams: Number(carbonStats.totalCO2.toFixed(6)),
+  });
 });
 
 const PORT = process.env.PORT || 4000;
